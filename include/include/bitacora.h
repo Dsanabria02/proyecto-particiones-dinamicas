@@ -9,4 +9,3 @@
 void registrar_evento(const char *accion, pid_t pid, int inicio, int fin);
 
 #endif
-
