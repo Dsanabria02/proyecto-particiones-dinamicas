@@ -132,12 +132,11 @@ void liberar_memoria(LineaMemoria *mem, int semid, int pid) {
             mem[i].size = 0;
             fin = i;
         }
-    }
 
-    if (inicio != -1 && fin != -1) {
         printf("Proceso %d liberó memoria de línea %d a %d\n", pid, inicio, fin);
         registrar_evento("Memoria liberada", pid, inicio, fin);  // Registro en bitácora
     }
+
 
     signal_semaforo(semid);
 }
