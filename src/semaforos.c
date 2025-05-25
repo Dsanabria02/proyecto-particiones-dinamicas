@@ -1,4 +1,4 @@
-#include "../include/compartido.h"
+#include "../include/estructura_memoria.h"
 
 void wait_semaforo(int semid) {
     struct sembuf op = {0, -1, 0};

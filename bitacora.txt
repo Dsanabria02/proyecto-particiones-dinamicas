@@ -1,0 +1,1 @@
+[21:11:58] PID 6748 → Simulación iniciada (líneas 0 a 49)

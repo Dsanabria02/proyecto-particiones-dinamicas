@@ -1,4 +1,4 @@
-#include "../include/compartido.h"
+#include "../include/estructura_memoria.h"
 #include "../include/bitacora.h"
 
 int main() {
