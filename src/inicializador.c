@@ -1,6 +1,8 @@
 // --------------- INICIALIZADOR.C ------------------------------------
 #include "../include/estructura_memoria.h"
+#include "../include/gestion_memoria.h"
 #include "../include/bitacora.h"
+#include <string.h>
 
 void inicializar_memoria(LineaMemoria *mem, int n) {
     for (int i = 0; i < n; i++) {
@@ -8,6 +10,10 @@ void inicializar_memoria(LineaMemoria *mem, int n) {
         mem[i].pid_ocupante = 0;
         mem[i].size = 0;
     }
+}
+
+void inicializar_procesos(ProcesoInfo *procesos) {
+    memset(procesos, 0, sizeof(ProcesoInfo) * MAX_PROCESOS);
 }
 
 int main() {
@@ -50,6 +56,26 @@ int main() {
     mem_n[0] = n;  // Guarda `n` en el primer bloque de memoria
     LineaMemoria *mem = (LineaMemoria *)(mem_n + 1);
     inicializar_memoria(mem, n);
+
+    // 🔥 Crear memoria compartida para `ProcesoInfo`
+    int shmid_procesos = shmget(CLAVE_PROCESOS, sizeof(ProcesoInfo) * MAX_PROCESOS, IPC_CREAT | 0666);
+    if (shmid_procesos == -1) {
+        perror("Error creando memoria compartida de procesos");
+        shmdt(mem_n);
+        exit(1);
+    }
+
+    ProcesoInfo *procesos = (ProcesoInfo *)shmat(shmid_procesos, NULL, 0);
+    if ((void *)procesos == (void *)-1) {
+        perror("Error al adjuntar memoria compartida de procesos");
+        shmdt(mem_n);
+        exit(1);
+    }
+
+    inicializar_procesos(procesos);
+
+    // 🔥 No desvincular procesos todavía si se usará en el programa
+    shmdt(procesos);
 
     int semid = semget(CLAVE_SEMAFORO, 1, IPC_CREAT | 0666);
     if (semid == -1) {
