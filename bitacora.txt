@@ -1,1 +1,6 @@
-[21:11:58] PID 6748 → Simulación iniciada (líneas 0 a 49)
+[21:57:00] PID 9797 → Simulación iniciada (líneas 0 a 9)
+[21:57:03] PID 9819 → Proceso creado (líneas 0 a 0)
+[21:57:04] PID 9820 → Proceso creado (líneas 0 a 0)
+[21:57:05] PID 9833 → Proceso creado (líneas 0 a 0)
+[21:57:06] PID 9843 → Proceso creado (líneas 0 a 0)
+[21:57:07] PID 9845 → Proceso creado (líneas 0 a 0)
