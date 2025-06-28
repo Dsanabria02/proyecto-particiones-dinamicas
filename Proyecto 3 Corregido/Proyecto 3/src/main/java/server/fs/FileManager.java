@@ -1,6 +1,7 @@
 package server.fs;
 
 import org.springframework.stereotype.Service;
+import java.time.format.DateTimeFormatter;
 import server.users.User;
 
 @Service
@@ -57,23 +58,39 @@ public class FileManager {
             throw new RuntimeException("No es un archivo");
     }
 
+    // --------------- VER PROPIEDADES -----------------------------------
+    private String formatSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(1024));
+        char unit = "KMGTPE".charAt(exp - 1);
+        double size = bytes / Math.pow(1024, exp);
+        return String.format("%.1f %sB", size, unit);
+    }
+
     public String fileProperties(User user, String name) {
-        // Mostrar propiedades del archivo o directorio
-        System.out.println("USUARIO:" + user);
-        System.out.println("NOMBRE DEL ARCHIVO:" + name);
         Node n = user.getCurrentDirectory().getChild(name);
-        if (n == null){
-            System.out.println("No se encontró el nodo: " + name);
+        if (n == null)
             throw new RuntimeException("Archivo o directorio no encontrado");
-        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
         if (n instanceof FileNode file) {
             return String.format(
-                    "Nombre: %s\nTamaño: %d\nCreado: %s\nModificado: %s\nExtensión: %s",
-                    file.getName(), file.getSize(), file.getCreated(), file.getModified(), file.getExtension());
+                "Nombre: %s\nTamaño: %s\nCreado: %s\nModificado: %s\nExtensión: %s",
+                file.getName(),
+                formatSize(file.getSize()),
+                file.getCreated().format(formatter),
+                file.getModified().format(formatter),
+                file.getExtension()
+            );
         } else {
             return String.format(
-                    "Nombre: %s\nTamaño: %d\nCreado: %s\nModificado: %s",
-                    n.getName(), n.getSize(), n.getCreated(), n.getModified());
+                "Nombre: %s\nTamaño: %s\nCreado: %s\nModificado: %s",
+                n.getName(),
+                formatSize(n.getSize()),
+                n.getCreated().format(formatter),
+                n.getModified().format(formatter)
+            );
         }
     }
 

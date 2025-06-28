@@ -91,9 +91,13 @@ function mostrarArchivos(textoPlano) {
 
   const lineas = textoPlano.trim().split("\n");
   lineas.forEach(linea => {
-    const tipo = linea.endsWith("/") ? "directorio" : "archivo";
+    const esDirectorio = linea.endsWith("/");
+    const tipo = esDirectorio ? "directorio" : "archivo";
+    const esFile = linea.startsWith("[FILE]");
+    const esDir = linea.startsWith("[DIR]");
     const nombreReal = linea.replace("/", "").replace("[FILE] ", "").replace("[DIR] ", "");
-    const nombreMostrado = nombreReal; // o decoralo aquí si querés
+    // Mostrar el nombre con el prefijo [FILE] o [DIR]
+    const nombreMostrado = esFile ? `[FILE] ${nombreReal}` : esDir ? `[DIR] ${nombreReal}` : nombreReal;
 
     const fila = document.createElement("tr");
     fila.innerHTML = `
@@ -105,7 +109,7 @@ function mostrarArchivos(textoPlano) {
              <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
              <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>`
           : `<button onclick="verArchivo('${nombreReal}')">Ver</button>
-             <button onclick="modificarArchivo('${nombreReal}')">Editar</button>
+             <button onclick="editarArchivo('${nombreReal}')">Editar</button>
              <button onclick="verPropiedades('${nombreReal}')">ℹ Propiedades</button>
              <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>`}
       </td>
