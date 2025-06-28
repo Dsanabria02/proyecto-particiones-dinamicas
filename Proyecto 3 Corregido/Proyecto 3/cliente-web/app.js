@@ -104,13 +104,13 @@ function mostrarArchivos(textoPlano) {
       <td>${nombreMostrado}</td>
       <td>${tipo}</td>
       <td>
-        ${tipo === "directorio"
+        ${tipo === "archivo"
           ? `<button onclick="cambiarDirectorio('${nombreReal}')">Entrar</button>
              <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
              <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>`
           : `<button onclick="verArchivo('${nombreReal}')">Ver</button>
              <button onclick="editarArchivo('${nombreReal}')">Editar</button>
-             <button onclick="verPropiedades('${nombreReal}')">ℹ Propiedades</button>
+             <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
              <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>`}
       </td>
     `;
