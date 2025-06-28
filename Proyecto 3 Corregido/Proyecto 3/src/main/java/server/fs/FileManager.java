@@ -23,13 +23,27 @@ public class FileManager {
         current.addChild(new DirectoryNode(name));
     }
 
-    public void changeDirectory(User user, String name) {
-        // Cambiarse a otro directorio
+    // --------- NAVEGAR DIRECTORIOS ---------------------------------
+    public String changeDirectory(User user, String name) {
+        // Cambiarse a otro directorio y devolver la ruta actual
         Node next = user.getCurrentDirectory().getChild(name);
-        if (next != null && next.isDirectory())
+        if (next != null && next.isDirectory()) {
             user.setCurrentDirectory((DirectoryNode) next);
-        else
+            return getCurrentPath(user);
+        } else {
             throw new RuntimeException("Directorio no encontrado");
+        }
+    }
+
+    // Devuelve la ruta actual como string, por ejemplo: /root/dir1/dir2
+    private String getCurrentPath(User user) {
+        DirectoryNode current = user.getCurrentDirectory();
+        StringBuilder path = new StringBuilder();
+        while (current != null) {
+            path.insert(0, "/" + current.getName());
+            current = current.getParent();
+        }
+        return path.toString();
     }
 
     public String listDirectory(User user) {
