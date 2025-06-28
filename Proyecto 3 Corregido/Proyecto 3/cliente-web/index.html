@@ -40,6 +40,7 @@
         <button onclick="abrirModalArchivo()">+ Crear archivo</button>
         <button onclick="abrirModalCarpeta()">+ Crear carpeta</button>
         <button onclick="refrescar()">⟳</button>
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>
     <table>
@@ -72,6 +73,16 @@
     </div>
   </div>
 
+  <!-- Modal para editar archivo -->
+  <div class="modal" id="modal-editar">
+    <div class="modal-content">
+      <h3>Editar archivo</h3>
+      <textarea id="editar-contenido" placeholder="Nuevo contenido..."></textarea>
+      <button onclick="guardarEdicion()">Guardar</button>
+      <button onclick="cerrarModal('modal-editar')">Cancelar</button>
+    </div>
+  </div>
+
   <!-- Modal de mensaje -->
   <div class="modal" id="modal-mensaje">
     <div class="modal-content">
@@ -93,16 +104,5 @@
   <!-- Scripts principales -->
   <script type="module" src="api.js"></script>
   <script type="module" src="app.js"></script>
-  
-  <!-- Modal de confirmación de eliminación -->
-<div class="modal" id="modal-confirmar-eliminar">
-  <div class="modal-content">
-    <h3>Confirmar eliminación</h3>
-    <p id="texto-confirmacion">¿Estás seguro de que deseas eliminar esto?</p>
-    <button onclick="confirmarEliminar()">Sí, eliminar</button>
-    <button onclick="cerrarModal('modal-confirmar-eliminar')">Cancelar</button>
-  </div>
-</div>
-
 </body>
 </html>
