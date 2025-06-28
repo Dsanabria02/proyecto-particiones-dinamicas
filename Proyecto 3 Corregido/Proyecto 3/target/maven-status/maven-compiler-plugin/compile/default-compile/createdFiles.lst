@@ -1,0 +1,15 @@
+server\controller\FileSystemController.class
+server\controller\CreateDirectoryRequest.class
+server\fs\JsonPersistence.class
+server\users\UserManager.class
+server\DriveWebApplication.class
+server\fs\FileNode.class
+server\users\User.class
+server\controller\ModifyFileRequest.class
+server\fs\Node.class
+server\controller\MoveCopyRequest.class
+server\controller\CreateFileRequest.class
+server\controller\ChangeDirectoryRequest.class
+server\fs\FileManager.class
+server\controller\ShareRequest.class
+server\fs\DirectoryNode.class
