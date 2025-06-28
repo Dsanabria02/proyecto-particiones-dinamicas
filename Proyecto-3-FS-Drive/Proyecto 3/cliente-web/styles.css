@@ -1,0 +1,235 @@
+/* Estilos generales */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f2f4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #333;
+}
+
+/* Contenedor central de login */
+#login-container {
+  background-color: white;
+  padding: 40px 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 300px;
+}
+
+#login-container h2 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+#login-container input,
+#login-container button {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.95em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#login-container input:focus {
+  outline: none;
+  border-color: #0b57d0;
+  box-shadow: 0 0 0 2px rgba(11, 87, 208, 0.2);
+}
+
+#login-container button {
+  background-color: #0b57d0;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+#login-container button:hover {
+  background-color: #0847ad;
+}
+
+#login-container a {
+  color: #0b57d0;
+  font-size: 0.9em;
+  text-align: center;
+  text-decoration: none;
+}
+
+#login-container a:hover {
+  text-decoration: underline;
+}
+
+/* Área principal oculta inicialmente */
+.main {
+  display: none;
+  flex-direction: column;
+  padding: 20px;
+  flex: 1;
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.top-bar h2 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+/* Barra de ruta mejorada */
+.ruta-barra {
+  background: linear-gradient(135deg, #e8f0fe 0%, #f8fbff 100%);
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 0 0 20px 0;
+  font-family: 'Courier New', Monaco, monospace;
+  font-size: 0.9em;
+  color: #1a73e8;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.ruta-barra::before {
+  content: '📁';
+  margin-right: 8px;
+  font-size: 1.1em;
+}
+
+.ruta-barra::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #1a73e8, #4285f4, #1a73e8);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* Tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+button {
+  background-color: #0b57d0;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 0.95em;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #0847ad;
+}
+
+/* Modales */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  width: 340px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  animation: aparecer 0.3s ease-out;
+}
+
+.modal input,
+.modal textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1em;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal de confirmación específico */
+#modal-confirmar-eliminar .modal-content {
+  text-align: center;
+}
+
+#modal-confirmar-eliminar h3 {
+  margin-bottom: 10px;
+}
+
+#modal-confirmar-eliminar p {
+  margin-bottom: 20px;
+  color: #444;
+}
+
+#modal-confirmar-eliminar button {
+  width: 100%;
+}
