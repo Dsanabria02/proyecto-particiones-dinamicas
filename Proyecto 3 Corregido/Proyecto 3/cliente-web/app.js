@@ -12,6 +12,7 @@ import {
 let usuarioActual = "";
 let contrasenaActual = "";
 let elementoAEliminar = { nombre: "", tipo: "" };
+let archivoEditando = "";
 
 // --- SESIÓN ---
 window.iniciarSesion = function () {
@@ -44,6 +45,12 @@ window.registrarse = function () {
       mostrarMensaje("El usuario ya existe.");
     }
   });
+};
+
+window.cerrarSesion = function () {
+  usuarioActual = "";
+  contrasenaActual = "";
+  mostrarLogin();
 };
 
 // --- VISIBILIDAD DE PANTALLAS ---
@@ -92,11 +99,12 @@ function mostrarArchivos(textoPlano) {
       <td>${tipo}</td>
       <td>
         ${tipo === "directorio"
-          ? `<button onclick="cambiarDirectorio('${nombre}')">Entrar</button>
-             <button onclick="mostrarConfirmacionEliminar('${nombre}', 'directorio')">Eliminar</button>`
-          : `<button onclick="verArchivo('${nombre}')">Ver</button>
-             <button onclick="modificarArchivo('${nombre}')">Editar</button>
-             <button onclick="mostrarConfirmacionEliminar('${nombre}', 'archivo')">Eliminar</button>`}
+          ? `<button onclick=\"cambiarDirectorio('${nombre}')\">Entrar</button>
+             <button onclick=\"mostrarConfirmacionEliminar('${nombre}', 'directorio')\">Eliminar</button>`
+          : `<button onclick=\"verArchivo('${nombre}')\">Ver</button>
+             <button onclick=\"editarArchivo('${nombre}')\">Editar</button>
+             <button onclick=\"descargarArchivo('${nombre}')\">Descargar</button>
+             <button onclick=\"mostrarConfirmacionEliminar('${nombre}', 'archivo')\">Eliminar</button>`}
       </td>
     `;
     tabla.appendChild(fila);
@@ -109,7 +117,8 @@ window.crearArchivoDesdeModal = function () {
   const ext = document.getElementById("input-extension-archivo").value.trim();
   const content = document.getElementById("input-contenido-archivo").value;
 
-  if (!name || !ext) return mostrarMensaje("Debe completar nombre y extensión");
+  if (!name || !ext || !content.trim()) return mostrarMensaje("Todos los campos son obligatorios.");
+
   crearArchivoAPI(usuarioActual, name, ext, content).then(() => {
     cerrarModal("modal-archivo");
     refrescar();
@@ -136,16 +145,37 @@ window.verArchivo = function (nombre) {
   });
 };
 
-window.modificarArchivo = function (nombre) {
-  const nuevoContenido = prompt("Nuevo contenido:");
+window.editarArchivo = function (nombre) {
+  archivoEditando = nombre;
+  verArchivoAPI(usuarioActual, nombre).then(contenido => {
+    document.getElementById("editar-contenido").value = contenido;
+    document.getElementById("modal-editar").style.display = "flex";
+  });
+};
+
+window.guardarEdicion = function () {
+  const nuevoContenido = document.getElementById("editar-contenido").value;
   if (nuevoContenido !== null)
-    modificarArchivoAPI(usuarioActual, nombre, nuevoContenido).then(() => refrescar());
+    modificarArchivoAPI(usuarioActual, archivoEditando, nuevoContenido).then(() => {
+      cerrarModal("modal-editar");
+      refrescar();
+    });
+};
+
+window.descargarArchivo = function (nombre) {
+  verArchivoAPI(usuarioActual, nombre).then(contenido => {
+    const blob = new Blob([contenido], { type: "text/plain" });
+    const enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = nombre;
+    enlace.click();
+  });
 };
 
 // --- ELIMINACIÓN CON CONFIRMACIÓN ---
 window.mostrarConfirmacionEliminar = function (nombre, tipo) {
   elementoAEliminar = { nombre, tipo };
-  document.getElementById("texto-confirmacion").textContent = `¿Deseás eliminar el ${tipo} "${nombre}"?`;
+  document.getElementById("texto-confirmacion").textContent = `¿Deseás eliminar el ${tipo} \"${nombre}\"?`;
   document.getElementById("modal-confirmar-eliminar").style.display = "flex";
 };
 
