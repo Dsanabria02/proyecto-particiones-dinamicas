@@ -67,10 +67,10 @@ public class FileSystemController {
         return fs.fileProperties(user, name);
     }
 
-    @DeleteMapping("/delete")
-    public String delete(@RequestParam String username, @RequestParam String name) {
-        User user = users.login(username);
-        fs.delete(user, name);
+    @PostMapping("/delete")
+    public String delete(@RequestBody DeleteRequest req) {
+        User user = users.login(req.username);
+        fs.delete(user, req.name);
         users.save(user);
         return "Eliminado";
     }
@@ -98,5 +98,11 @@ public class FileSystemController {
         fs.share(from, req.name(), to);
         users.save(to);
         return "Compartido";
+    }
+
+    // Clase interna o externa si lo preferís (para mapear el body del delete)
+    public static class DeleteRequest {
+        public String username;
+        public String name;
     }
 }
