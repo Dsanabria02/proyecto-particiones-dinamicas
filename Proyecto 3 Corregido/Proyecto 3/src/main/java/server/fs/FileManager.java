@@ -59,9 +59,13 @@ public class FileManager {
 
     public String fileProperties(User user, String name) {
         // Mostrar propiedades del archivo o directorio
+        System.out.println("USUARIO:" + user);
+        System.out.println("NOMBRE DEL ARCHIVO:" + name);
         Node n = user.getCurrentDirectory().getChild(name);
-        if (n == null)
+        if (n == null){
+            System.out.println("No se encontró el nodo: " + name);
             throw new RuntimeException("Archivo o directorio no encontrado");
+        }
         if (n instanceof FileNode file) {
             return String.format(
                     "Nombre: %s\nTamaño: %d\nCreado: %s\nModificado: %s\nExtensión: %s",

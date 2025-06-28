@@ -5,6 +5,7 @@ import {
   cambiarDirectorioAPI,
   verArchivoAPI,
   modificarArchivoAPI,
+  verPropiedadesAPI,
   loginUsuario,
   registrarUsuario
 } from "./api.js";
@@ -91,25 +92,28 @@ function mostrarArchivos(textoPlano) {
   const lineas = textoPlano.trim().split("\n");
   lineas.forEach(linea => {
     const tipo = linea.endsWith("/") ? "directorio" : "archivo";
-    const nombre = linea.replace("/", "");
-    const fila = document.createElement("tr");
+    const nombreReal = linea.replace("/", "").replace("[FILE] ", "").replace("[DIR] ", "");
+    const nombreMostrado = nombreReal; // o decoralo aquí si querés
 
+    const fila = document.createElement("tr");
     fila.innerHTML = `
-      <td>${nombre}</td>
+      <td>${nombreMostrado}</td>
       <td>${tipo}</td>
       <td>
         ${tipo === "directorio"
-          ? `<button onclick=\"cambiarDirectorio('${nombre}')\">Entrar</button>
-             <button onclick=\"mostrarConfirmacionEliminar('${nombre}', 'directorio')\">Eliminar</button>`
-          : `<button onclick=\"verArchivo('${nombre}')\">Ver</button>
-             <button onclick=\"editarArchivo('${nombre}')\">Editar</button>
-             <button onclick=\"descargarArchivo('${nombre}')\">Descargar</button>
-             <button onclick=\"mostrarConfirmacionEliminar('${nombre}', 'archivo')\">Eliminar</button>`}
+          ? `<button onclick="cambiarDirectorio('${nombreReal}')">Entrar</button>
+             <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
+             <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>`
+          : `<button onclick="verArchivo('${nombreReal}')">Ver</button>
+             <button onclick="modificarArchivo('${nombreReal}')">Editar</button>
+             <button onclick="verPropiedades('${nombreReal}')">ℹ Propiedades</button>
+             <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>`}
       </td>
     `;
     tabla.appendChild(fila);
   });
 }
+
 
 // --- MODALES DE CREACIÓN ---
 window.crearArchivoDesdeModal = function () {
@@ -171,6 +175,14 @@ window.descargarArchivo = function (nombre) {
     enlace.click();
   });
 };
+
+window.verPropiedades = function (nombre) {
+  console.log("Propiedades solicitadas de:", nombre);
+  verPropiedadesAPI(usuarioActual, nombre)
+    .then(props => mostrarMensaje("Propiedades:\n" + props))
+    .catch(err => mostrarMensaje("Error al obtener propiedades: " + err.message));
+};
+
 
 // --- ELIMINACIÓN CON CONFIRMACIÓN ---
 window.mostrarConfirmacionEliminar = function (nombre, tipo) {

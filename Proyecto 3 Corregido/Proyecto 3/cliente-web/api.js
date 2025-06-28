@@ -52,6 +52,19 @@ export async function modificarArchivoAPI(username, name, content) {
   return res.text();
 }
 
+// Llama al endpoint para ver las propiedades del archivo
+export async function verPropiedadesAPI(username, name) {
+  const url = `/api/fs/view-properties?username=${encodeURIComponent(username)}&name=${encodeURIComponent(name)}`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error);
+  }
+
+  return await response.text();
+}
+
 // ------------------- FUNCIONES DE AUTENTICACIÓN -------------------
 
 // Llama al endpoint para registrar un nuevo usuario

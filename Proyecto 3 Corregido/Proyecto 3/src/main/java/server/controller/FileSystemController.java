@@ -1,5 +1,7 @@
 package server.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.fs.FileManager;
 import server.users.User;
@@ -61,11 +63,21 @@ public class FileSystemController {
         return "Archivo modificado";
     }
 
-    @GetMapping("/properties")
-    public String fileProperties(@RequestParam String username, @RequestParam String name) {
+    @GetMapping("/view-properties")
+    public ResponseEntity<String> fileProperties(@RequestParam String username, @RequestParam String name) {
+    try {
         User user = users.login(username);
-        return fs.fileProperties(user, name);
+        String props = fs.fileProperties(user, name);
+        return ResponseEntity.ok(props);
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("Archivo o directorio no encontrado: " + e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error inesperado: " + e.getMessage());
     }
+}
+
 
     @PostMapping("/delete")
     public String delete(@RequestBody DeleteRequest req) {
