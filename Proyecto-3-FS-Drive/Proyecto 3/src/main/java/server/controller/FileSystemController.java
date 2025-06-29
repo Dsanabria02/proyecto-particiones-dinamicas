@@ -22,7 +22,7 @@ public class FileSystemController {
     @PostMapping("/create-file")
     public String createFile(@RequestBody CreateFileRequest req) {
         User user = users.login(req.username());
-        fs.createFile(user, req.name(), req.extension(), req.content(), false);
+        fs.createFile(user, req.name(), req.extension(), req.content(), req.overwrite());
         users.save(user);
         return "Archivo creado";
     }
@@ -30,18 +30,22 @@ public class FileSystemController {
     @PostMapping("/create-directory")
     public String createDirectory(@RequestBody CreateDirectoryRequest req) {
         User user = users.login(req.username());
-        fs.createDirectory(user, req.name(), false);
+        fs.createDirectory(user, req.name(), req.overwrite());
         users.save(user);
         return "Directorio creado";
     }
 
+    @GetMapping("/exists")
+    public boolean exists(@RequestParam String username, @RequestParam String name) {
+        User user = users.login(username);
+        return user.getCurrentDirectory().getChild(name) != null;
+    }
 
     @GetMapping("/path")
     public String getCurrentPath(@RequestParam String username) {
         User user = users.login(username);
         return fs.getCurrentPath(user);
     }
-
 
 
     @PostMapping("/change-directory")

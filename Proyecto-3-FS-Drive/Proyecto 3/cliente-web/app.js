@@ -7,6 +7,7 @@ import {
   modificarArchivoAPI,
   verPropiedadesAPI,
   mostrarRuta,
+  verificarExistencia,
   loginUsuario,
   registrarUsuario
 } from "./api.js";
@@ -52,6 +53,7 @@ window.registrarse = function () {
 window.cerrarSesion = function () {
   usuarioActual = "";
   contrasenaActual = "";
+  cambiarDirectorioAPI(usuarioActual, "root").then(() => refrescar());
   mostrarLogin();
 };
 
@@ -93,56 +95,73 @@ function mostrarArchivos(textoPlano) {
 
   const lineas = textoPlano.trim().split("\n");
   lineas.forEach(linea => {
-    const esDirectorio = linea.endsWith("/");
-    const tipo = esDirectorio ? "directorio" : "archivo";
     const esFile = linea.startsWith("[FILE]");
     const esDir = linea.startsWith("[DIR]");
-    const nombreReal = linea.replace("/", "").replace("[FILE] ", "").replace("[DIR] ", "");
-    // Mostrar el nombre con el prefijo [FILE] o [DIR]
-    const nombreMostrado = esFile ? `[FILE] ${nombreReal}` : esDir ? `[DIR] ${nombreReal}` : nombreReal;
+    const tipo = esDir ? "directorio" : "archivo";
+
+    const nombreReal = linea.replace("[FILE] ", "").replace("[DIR] ", "");
 
     const fila = document.createElement("tr");
     fila.innerHTML = `
-      <td>${nombreMostrado}</td>
+      <td>${linea}</td>
       <td>${tipo}</td>
       <td>
-        ${tipo === "archivo"
-          ? `<button onclick="cambiarDirectorio('${nombreReal}')">Entrar</button>
-             <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
-             <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>`
-          : `<button onclick="verArchivo('${nombreReal}')">Ver</button>
-             <button onclick="editarArchivo('${nombreReal}')">Editar</button>
-             <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
-             <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>`}
+        ${
+          tipo === "directorio"
+            ? `<button onclick="cambiarDirectorio('${nombreReal}')">Entrar</button>
+               <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
+               <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>`
+            : `<button onclick="verArchivo('${nombreReal}')">Ver</button>
+               <button onclick="editarArchivo('${nombreReal}')">Editar</button>
+               <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
+               <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>`
+        }
       </td>
     `;
     tabla.appendChild(fila);
   });
 }
 
-
 // --- MODALES DE CREACIÓN ---
-window.crearArchivoDesdeModal = function () {
+window.crearArchivoDesdeModal = async function () {
   const name = document.getElementById("input-nombre-archivo").value.trim();
   const ext = document.getElementById("input-extension-archivo").value.trim();
   const content = document.getElementById("input-contenido-archivo").value;
 
   if (!name || !ext || !content.trim()) return mostrarMensaje("Todos los campos son obligatorios.");
 
-  crearArchivoAPI(usuarioActual, name, ext, content).then(() => {
+  const existe = await verificarExistencia(usuarioActual, name);
+  let overwrite = false;
+
+  if (existe) {
+    overwrite = confirm("Ya existe un archivo/directorio con ese nombre. ¿Deseás reemplazarlo?");
+    if (!overwrite) return;
+  }
+
+  crearArchivoAPI(usuarioActual, name, ext, content, overwrite).then(() => {
     cerrarModal("modal-archivo");
     refrescar();
   });
 };
 
-window.crearDirectorioDesdeModal = function () {
+window.crearDirectorioDesdeModal = async function () {
   const name = document.getElementById("input-nombre-carpeta").value.trim();
   if (!name) return mostrarMensaje("Debe ingresar un nombre de carpeta");
-  crearDirectorioAPI(usuarioActual, name).then(() => {
+
+  const existe = await verificarExistencia(usuarioActual, name);
+  let overwrite = false;
+
+  if (existe) {
+    overwrite = confirm("Ya existe un archivo/directorio con ese nombre. ¿Deseás reemplazarlo?");
+    if (!overwrite) return;
+  }
+
+  crearDirectorioAPI(usuarioActual, name, overwrite).then(() => {
     cerrarModal("modal-carpeta");
     refrescar();
   });
 };
+
 
 // --- ACCIONES CON ARCHIVOS ---
 window.cambiarDirectorio = function (nombre) {

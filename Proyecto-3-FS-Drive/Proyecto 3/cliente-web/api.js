@@ -7,23 +7,29 @@ export async function listarArchivos(username) {
 }
 
 // Llama al endpoint para crear un archivo nuevo
-export async function crearArchivoAPI(username, name, extension, content) {
+export async function crearArchivoAPI(username, name, extension, content, overwrite = false) {
   const res = await fetch("/api/fs/create-file", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, name, extension, content })
+    body: JSON.stringify({ username, name, extension, content, overwrite })
   });
   return res.text();
 }
 
 // Llama al endpoint para crear un nuevo directorio
-export async function crearDirectorioAPI(username, name) {
+export async function crearDirectorioAPI(username, name, overwrite = false) {
   const res = await fetch("/api/fs/create-directory", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, name })
+    body: JSON.stringify({ username, name, overwrite })
   });
   return res.text();
+}
+
+// Llama al endpoint para verificar existencia de archivo/directorio
+export async function verificarExistencia(username, name) {
+  const res = await fetch(`/api/fs/exists?username=${username}&name=${name}`);
+  return res.ok ? await res.json() : false;
 }
 
 // Llama al endpoint para cambiar de directorio
