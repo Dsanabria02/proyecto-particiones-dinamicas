@@ -6,29 +6,29 @@
     "root": {
       "children": [
         {
-          "extension": "txt",
-          "content": "Hola esto es una preuba",
           "name": "diana prueba",
           "created": "2025-06-28T21:16:46.097865",
           "modified": "2025-06-28T21:16:46.097865",
           "size": 23,
-          "type": "file"
+          "type": "file",
+          "extension": "txt",
+          "content": "Hola esto es una preuba"
         },
         {
-          "children": [],
           "name": "Prueba 1",
           "created": "2025-06-28T21:17:29.929375300",
-          "modified": "2025-06-28T21:17:29.929375300",
+          "modified": "2025-06-29T05:02:06.132597500",
           "size": 0,
-          "type": "directory"
+          "type": "directory",
+          "children": []
         },
         {
-          "children": [],
           "name": "Prueba 2",
           "created": "2025-06-28T21:17:36.674172400",
           "modified": "2025-06-28T21:17:36.675169400",
           "size": 0,
-          "type": "directory"
+          "type": "directory",
+          "children": []
         }
       ],
       "name": "root",
@@ -44,36 +44,46 @@
       "size": 0
     },
     "currentDirectory": {
+      "children": [],
+      "name": "Prueba 1",
+      "created": "2025-06-28T21:17:29.929375300",
+      "modified": "2025-06-29T05:02:06.132597500",
+      "size": 0
+    }
+  },
+  "diana": {
+    "username": "diana",
+    "password": "123",
+    "maxSize": 10240,
+    "root": {
+      "children": [],
+      "name": "root",
+      "created": "2025-06-29T03:16:01.135982700",
+      "modified": "2025-06-29T03:16:01.135982700",
+      "size": 0
+    },
+    "shared": {
       "children": [
         {
-          "extension": "txt",
-          "content": "Hola esto es una preuba",
           "name": "diana prueba",
-          "created": "2025-06-28T21:16:46.097865",
-          "modified": "2025-06-28T21:16:46.097865",
+          "created": "2025-06-29T03:47:06.380031",
+          "modified": "2025-06-29T03:47:06.380031",
           "size": 23,
-          "type": "file"
-        },
-        {
-          "children": [],
-          "name": "Prueba 1",
-          "created": "2025-06-28T21:17:29.929375300",
-          "modified": "2025-06-28T21:17:29.929375300",
-          "size": 0,
-          "type": "directory"
-        },
-        {
-          "children": [],
-          "name": "Prueba 2",
-          "created": "2025-06-28T21:17:36.674172400",
-          "modified": "2025-06-28T21:17:36.675169400",
-          "size": 0,
-          "type": "directory"
+          "type": "file",
+          "extension": "txt",
+          "content": "Hola esto es una preuba"
         }
       ],
+      "name": "shared",
+      "created": "2025-06-29T03:16:01.135982700",
+      "modified": "2025-06-29T03:47:06.380031",
+      "size": 23
+    },
+    "currentDirectory": {
+      "children": [],
       "name": "root",
-      "created": "2025-06-28T20:34:50.365083800",
-      "modified": "2025-06-28T20:34:50.365083800",
+      "created": "2025-06-29T03:16:01.135982700",
+      "modified": "2025-06-29T03:16:01.135982700",
       "size": 0
     }
   }
