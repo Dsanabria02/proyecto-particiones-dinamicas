@@ -8,8 +8,12 @@ import server.users.User;
 import server.users.UserManager;
 import java.util.List;
 import server.fs.Node;
+import java.util.Map;
 
 
+
+
+    
 @RestController
 @RequestMapping("/api/fs")
 public class FileSystemController {
@@ -83,7 +87,7 @@ public class FileSystemController {
     @PostMapping("/copy")
     public String copy(@RequestBody MoveCopyRequest req) {
         User user = users.getUser(req.username());
-        fs.copy(user, req.name(), req.targetDir());
+        fs.copy(user, req.name(), req.targetFolder()); // <-- aquí
         users.save(user);
         return "Copiado";
     }
@@ -91,7 +95,7 @@ public class FileSystemController {
     @PostMapping("/move")
     public String move(@RequestBody MoveCopyRequest req) {
         User user = users.getUser(req.username());
-        fs.move(user, req.name(), req.targetDir());
+        fs.move(user, req.name(), req.targetFolder()); // <-- aquí
         users.save(user);
         return "Movido";
     }
@@ -130,6 +134,48 @@ public class FileSystemController {
         return fs.viewSharedFile(user, name);
     }
 
+    @PostMapping("/copy-to-folder")
+    public ResponseEntity<?> copiarArchivo(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String name = body.get("name");
+        String targetFolder = body.get("targetFolder");
+
+        try {
+            User user = users.getUser(username);
+            fs.copy(user, name, targetFolder);
+            users.save(user);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al copiar: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/move-to-folder")
+    public ResponseEntity<?> moverArchivo(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String name = body.get("name");
+        String targetFolder = body.get("targetFolder");
+
+        try {
+            User user = users.getUser(username);
+            fs.move(user, name, targetFolder);
+            users.save(user);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al mover: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/folders")
+    public ResponseEntity<List<String>> listarCarpetasUsuario(@RequestParam String username) {
+        try {
+            User user = users.getUser(username);
+            List<String> carpetas = fs.listFolders(user);
+            return ResponseEntity.ok(carpetas);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     @GetMapping("/exists")
     public boolean exists(@RequestParam String username, @RequestParam String name) {
@@ -163,4 +209,3 @@ public class FileSystemController {
         public String name;
     }
 }
-
