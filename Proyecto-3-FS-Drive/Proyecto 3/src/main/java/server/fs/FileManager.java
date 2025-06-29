@@ -59,21 +59,27 @@ public class FileManager {
     // --------- NAVEGAR DIRECTORIOS ---------------------------------
 
     public void changeDirectory(User user, String name) {
+        System.out.println("Intentando cambiar de directorio a: " + name);
         if ("..".equals(name)) {
             DirectoryNode current = user.getCurrentDirectory();
             DirectoryNode parent = current.getParent();
             if (parent != null) {
                 user.setCurrentDirectory(parent);
+                System.out.println("Cambiado al directorio padre: " + parent.getName());
+            } else {
+                System.out.println("Ya estás en el directorio raíz, no se puede subir más.");
             }
-            // Si ya estás en root, simplemente no cambia
         } else {
             Node next = user.getCurrentDirectory().getChild(name);
             if (next != null && next.isDirectory()) {
                 user.setCurrentDirectory((DirectoryNode) next);
+                System.out.println("Cambiado al directorio: " + next.getName());
             } else {
+                System.out.println("Directorio no encontrado: " + name);
                 throw new RuntimeException("Directorio no encontrado");
             }
         }
+        System.out.println("Directorio actual: " + user.getCurrentDirectory().getName());
     }
 
     // Cambio de directorio con retorno de path (versión extendida)
@@ -112,13 +118,18 @@ public class FileManager {
     }
 
     public void modifyFile(User user, String name, String newContent) {
-        // Modificar archivo
         Node n = user.getCurrentDirectory().getChild(name);
-        if (n instanceof FileNode file)
+        if (n instanceof FileNode file) {
             file.setContent(newContent);
-        else
+
+            // 👇 ACTUALIZAR también el directorio contenedor
+            DirectoryNode parent = user.getCurrentDirectory();
+            parent.setModified(java.time.LocalDateTime.now());
+        } else {
             throw new RuntimeException("No es un archivo");
+        }
     }
+
 
     // --------------- VER PROPIEDADES -----------------------------------
 

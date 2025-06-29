@@ -261,7 +261,8 @@ window.verPropiedades = function (nombre) {
 };
 
 window.subirUnNivel = function () {
-  pass
+  console.log("→ Subiendo un nivel...");
+  cambiarDirectorioAPI(usuarioActual, "..").then(() => refrescar());
 };
 
 // Llamado desde el botón "Compartir"
