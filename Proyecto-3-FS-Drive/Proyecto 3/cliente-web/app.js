@@ -128,7 +128,7 @@ function mostrarArchivos(textoPlano, esCompartido = false) {
           <button onclick="verArchivo('${nombreReal}')">Ver</button>
           <button onclick="editarArchivo('${nombreReal}')">Editar</button>
           <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
-          <button onclick="descargarArchivo('${nombreReal}')">Descargar</button>
+          <button onclick="descargarArchivo('${nombreReal}')">↓</button>
           <button onclick="abrirModalCompartir('${nombreReal}')">Compartir</button>
           <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>
         `;
@@ -261,7 +261,7 @@ window.verPropiedades = function (nombre) {
 };
 
 window.subirUnNivel = function () {
-  cambiarDirectorioAPI(usuarioActual, "..").then(() => refrescar());
+  pass
 };
 
 // Llamado desde el botón "Compartir"
