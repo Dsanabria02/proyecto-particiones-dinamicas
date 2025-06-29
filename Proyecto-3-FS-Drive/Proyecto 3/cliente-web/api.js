@@ -88,6 +88,34 @@ export async function mostrarRuta(username) {
     }
 }
 
+export async function compartirArchivoAPI(fromUser, toUser, name) {
+  // Limpiar nombre eliminando etiquetas como "[FILE] " o "[DIR] "
+  if (name.startsWith("[FILE]") || name.startsWith("[DIR]")) {
+    name = name.replace(/^\[\w+\]\s*/, "");
+  }
+
+  const res = await fetch("/api/fs/share", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fromUser, toUser, name })
+  });
+
+  if (!res.ok) throw new Error("No se pudo compartir el archivo.");
+  return res.text();
+}
+
+export async function listSharedFiles(username) {
+  const res = await fetch(`/api/fs/shared?username=${username}`);
+  if (!res.ok) throw new Error("Error al listar compartidos");
+  return await res.text();
+}
+
+export async function verArchivoCompartidoAPI(username, name) {
+  const res = await fetch(`/api/fs/view-shared-file?username=${username}&name=${name}`);
+  if (!res.ok) throw new Error("No se pudo obtener el archivo compartido");
+  return await res.text();
+}
+
 // ------------------- FUNCIONES DE AUTENTICACIÓN -------------------
 
 // Llama al endpoint para registrar un nuevo usuario
