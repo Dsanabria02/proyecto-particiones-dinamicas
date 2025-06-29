@@ -51,7 +51,7 @@ export async function verArchivoAPI(username, name) {
 // Llama al endpoint para modificar el contenido de un archivo
 export async function modificarArchivoAPI(username, name, content) {
   const res = await fetch("/api/fs/modify-file", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, name, content })
   });
