@@ -65,7 +65,7 @@ public class FileManager {
             if (parent != null) {
                 user.setCurrentDirectory(parent);
             }
-        // Si ya estás en root, simplemente no cambia
+            // Si ya estás en root, simplemente no cambia
         } else {
             Node next = user.getCurrentDirectory().getChild(name);
             if (next != null && next.isDirectory()) {
@@ -196,15 +196,46 @@ public class FileManager {
     }
 
     public void share(User fromUser, String name, User toUser) {
-        // Compartir archivo o directorio
+        System.out.println("Intentando compartir archivo: " + name);
+        System.out.println("Usuario origen: " + fromUser.getUsername());
+        System.out.println("Directorio actual: " + fromUser.getCurrentDirectory().getName());
+
         Node n = fromUser.getCurrentDirectory().getChild(name);
+        if (n == null) {
+            System.out.println("No se encontró el archivo '" + name + "' en el directorio actual.");
+            throw new RuntimeException("Archivo no encontrado.");
+        }
+
+        if (n == null) {
+            System.out.println("Error: El archivo o directorio \"" + name + "\" no existe en el directorio actual del usuario " + fromUser.getUsername());
+            return;
+        }
+
         if (n instanceof FileNode file) {
             toUser.getShared().addChild(new FileNode(file.getName(), file.getExtension(), file.getContent()));
+            System.out.println("Archivo \"" + name + "\" compartido de " + fromUser.getUsername() + " a " + toUser.getUsername());
         } else if (n instanceof DirectoryNode dir) {
             toUser.getShared().addChild(cloneDirectory(dir));
+            System.out.println("Directorio \"" + name + "\" compartido de " + fromUser.getUsername() + " a " + toUser.getUsername());
         } else {
-            throw new RuntimeException("Archivo o directorio no encontrado");
+            System.out.println("Error: El nodo \"" + name + "\" no es un archivo ni un directorio válido.");
         }
+    }
+
+    public String listShared(User user) {
+        DirectoryNode shared = user.getShared();
+        StringBuilder sb = new StringBuilder();
+        for (Node n : shared.getChildren()) {
+            sb.append(n.isDirectory() ? "[DIR] " : "[FILE] ").append(n.getName()).append("\n");
+        }
+        return sb.toString();
+    }
+
+    public String viewSharedFile(User user, String name) {
+        Node n = user.getShared().getChild(name);
+        if (n instanceof FileNode file)
+            return file.getContent();
+        throw new RuntimeException("Archivo compartido no encontrado o inválido");
     }
 
     private DirectoryNode cloneDirectory(DirectoryNode dir) {
