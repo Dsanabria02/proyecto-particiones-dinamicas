@@ -238,6 +238,10 @@ window.verPropiedades = function (nombre) {
     .catch(err => mostrarMensaje("Error al obtener propiedades: " + err.message));
 };
 
+window.subirUnNivel = function () {
+  cambiarDirectorioAPI(usuarioActual, "..").then(() => refrescar());
+};
+
 
 // --- ELIMINACIÓN CON CONFIRMACIÓN ---
 window.mostrarConfirmacionEliminar = function (nombre, tipo) {

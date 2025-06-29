@@ -59,12 +59,21 @@ public class FileManager {
     // --------- NAVEGAR DIRECTORIOS ---------------------------------
 
     public void changeDirectory(User user, String name) {
-        // Cambiarse a otro directorio
-        Node next = user.getCurrentDirectory().getChild(name);
-        if (next != null && next.isDirectory())
-            user.setCurrentDirectory((DirectoryNode) next);
-        else
-            throw new RuntimeException("Directorio no encontrado");
+        if ("..".equals(name)) {
+            DirectoryNode current = user.getCurrentDirectory();
+            DirectoryNode parent = current.getParent();
+            if (parent != null) {
+                user.setCurrentDirectory(parent);
+            }
+        // Si ya estás en root, simplemente no cambia
+        } else {
+            Node next = user.getCurrentDirectory().getChild(name);
+            if (next != null && next.isDirectory()) {
+                user.setCurrentDirectory((DirectoryNode) next);
+            } else {
+                throw new RuntimeException("Directorio no encontrado");
+            }
+        }
     }
 
     // Cambio de directorio con retorno de path (versión extendida)

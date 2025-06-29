@@ -78,6 +78,14 @@ export async function mostrarRuta(username) {
 
     const contenedorRuta = document.getElementById("path-bar");
     contenedorRuta.textContent = ruta;
+
+    // Ocultar botón de volver si estás en raíz
+    const botonVolver = document.querySelector("button[onclick='subirUnNivel()']");
+    if (ruta === "/") {
+      botonVolver.style.display = "none";
+    } else {
+      botonVolver.style.display = "inline-block";
+    }
 }
 
 // ------------------- FUNCIONES DE AUTENTICACIÓN -------------------

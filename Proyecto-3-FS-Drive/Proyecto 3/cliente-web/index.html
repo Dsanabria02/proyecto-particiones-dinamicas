@@ -36,7 +36,12 @@
   <div class="main" id="drive-content" style="display:none">
     <div class="top-bar">
       <h2>Contenido del Drive</h2>
-      <p id="path-bar" class="ruta-barra"></p>
+
+      <div>
+        <button onclick="subirUnNivel()">⬅ Volver</button>
+        <p id="path-bar" class="ruta-barra"></p>
+      </div>
+
       <div>
         <button onclick="abrirModalArchivo()">+ Crear archivo</button>
         <button onclick="abrirModalCarpeta()">+ Crear carpeta</button>
@@ -45,6 +50,7 @@
         <button onclick="refrescar()">⟳</button>
         <button onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
+      
     </div>
     <table>
       <thead>
