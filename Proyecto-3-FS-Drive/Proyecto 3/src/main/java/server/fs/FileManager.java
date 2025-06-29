@@ -5,6 +5,9 @@ import server.users.User;
 
 import java.time.format.DateTimeFormatter;
 
+import java.util.List;
+import java.util.ArrayList;
+
 @Service
 public class FileManager {
 
@@ -130,7 +133,6 @@ public class FileManager {
         }
     }
 
-
     // --------------- VER PROPIEDADES -----------------------------------
 
     private String formatSize(long bytes) {
@@ -175,35 +177,36 @@ public class FileManager {
 
     public void copy(User user, String name, String targetDirName) {
         Node original = user.getCurrentDirectory().getChild(name);
-        Node targetNode = user.getCurrentDirectory().getChild(targetDirName);
-
         if (original == null)
             throw new RuntimeException("Archivo a copiar no encontrado");
 
-        if (!(targetNode instanceof DirectoryNode target))
-            throw new RuntimeException("El destino no es un directorio");
+        DirectoryNode destination = findDirectoryByPath(user.getRootDirectory(), targetDirName);
+        if (destination == null || !destination.isDirectory()) {
+            throw new RuntimeException("El destino no es un directorio válido");
+        }
 
         if (original instanceof FileNode file) {
-            target.addChild(new FileNode(file.getName(), file.getExtension(), file.getContent()));
+            destination.addChild(new FileNode(file.getName(), file.getExtension(), file.getContent()));
         } else if (original instanceof DirectoryNode dir) {
-            target.addChild(cloneDirectory(dir));
+            destination.addChild(cloneDirectory(dir));
         } else {
             throw new RuntimeException("Tipo de nodo no soportado");
         }
     }
 
+
     public void move(User user, String name, String targetDirName) {
         Node node = user.getCurrentDirectory().getChild(name);
-        Node targetNode = user.getCurrentDirectory().getChild(targetDirName);
-
         if (node == null)
             throw new RuntimeException("Archivo o directorio a mover no encontrado");
 
-        if (!(targetNode instanceof DirectoryNode target))
-            throw new RuntimeException("El destino no es un directorio");
+        DirectoryNode destination = findDirectoryByPath(user.getRootDirectory(), targetDirName);
+        if (destination == null || !destination.isDirectory()) {
+            throw new RuntimeException("El destino no es un directorio válido");
+        }
 
         user.getCurrentDirectory().removeChild(name);
-        target.addChild(node);
+        destination.addChild(node);
     }
 
     public void share(User fromUser, String name, User toUser) {
@@ -218,16 +221,19 @@ public class FileManager {
         }
 
         if (n == null) {
-            System.out.println("Error: El archivo o directorio \"" + name + "\" no existe en el directorio actual del usuario " + fromUser.getUsername());
+            System.out.println("Error: El archivo o directorio \"" + name
+                    + "\" no existe en el directorio actual del usuario " + fromUser.getUsername());
             return;
         }
 
         if (n instanceof FileNode file) {
             toUser.getShared().addChild(new FileNode(file.getName(), file.getExtension(), file.getContent()));
-            System.out.println("Archivo \"" + name + "\" compartido de " + fromUser.getUsername() + " a " + toUser.getUsername());
+            System.out.println(
+                    "Archivo \"" + name + "\" compartido de " + fromUser.getUsername() + " a " + toUser.getUsername());
         } else if (n instanceof DirectoryNode dir) {
             toUser.getShared().addChild(cloneDirectory(dir));
-            System.out.println("Directorio \"" + name + "\" compartido de " + fromUser.getUsername() + " a " + toUser.getUsername());
+            System.out.println("Directorio \"" + name + "\" compartido de " + fromUser.getUsername() + " a "
+                    + toUser.getUsername());
         } else {
             System.out.println("Error: El nodo \"" + name + "\" no es un archivo ni un directorio válido.");
         }
@@ -260,4 +266,75 @@ public class FileManager {
         }
         return copy;
     }
+
+    public List<String> listFolders(User user) {
+        List<String> folders = new ArrayList<>();
+        collectFolderPaths(user.getRootDirectory(), "", folders);
+        return folders;
+    }
+
+    
+    private void collectFolderPaths(DirectoryNode node, String path, List<String> folders) {
+        String currentPath = path.isEmpty() ? node.getName() : path + "/" + node.getName();
+        folders.add(currentPath);
+        for (Node child : node.getChildren()) {
+            if (child instanceof DirectoryNode) {
+                collectFolderPaths((DirectoryNode) child, currentPath, folders);
+            }
+        }
+    }
+
+    public DirectoryNode findDirectoryByPath(DirectoryNode root, String path) {
+        if (path == null || path.isEmpty() || path.equals("root")) {
+            return root;
+        }
+
+        String[] parts = path.split("/");
+        DirectoryNode current = root;
+
+        for (String part : parts) {
+            if (part.equals("root") || part.isBlank()) continue;
+
+            Node nextNode = current.getChild(part);
+            if (nextNode == null || !nextNode.isDirectory()) {
+                return null; // No existe o no es directorio
+            }
+            current = (DirectoryNode) nextNode; 
+        }
+
+        return current;
+    }
+
+    private Node cloneNode(Node original) {
+        if (original instanceof DirectoryNode) {
+            DirectoryNode clonedDir = new DirectoryNode(original.getName());
+            for (Node child : ((DirectoryNode) original).getChildren()) {
+                clonedDir.addChild(cloneNode(child));
+            }
+            return clonedDir;
+        } else if (original instanceof FileNode file) {
+            return new FileNode(file.getName(), file.getExtension(), file.getContent());
+        }
+        return null;
+    }
+
+    private void collectFolders(DirectoryNode node, List<String> folders) {
+        folders.add(node.getName());
+        for (Node child : node.getChildren()) {
+            if (child instanceof DirectoryNode) {
+                collectFolders((DirectoryNode) child, folders);
+            }
+        }
+    }
+
+    private String generateUniqueName(DirectoryNode dir, String baseName) {
+        String name = baseName;
+        int counter = 1;
+        while (dir.getChild(name) != null) {
+            name = baseName + " (" + counter + ")";
+            counter++;
+        }
+        return name;
+    }
+
 }
