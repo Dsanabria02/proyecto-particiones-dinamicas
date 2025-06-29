@@ -116,6 +116,25 @@ export async function verArchivoCompartidoAPI(username, name) {
   return await res.text();
 }
 
+export async function copiarArchivoAPI(username, nombreArchivo, carpetaDestino) {
+  const res = await fetch('/api/fs/copy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, name: nombreArchivo, targetFolder: carpetaDestino })
+  });
+  if (!res.ok) throw new Error('No se pudo copiar el archivo.');
+}
+
+export async function moverArchivoAPI(username, nombreArchivo, carpetaDestino) {
+  const res = await fetch('/api/fs/move', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, name: nombreArchivo, targetFolder: carpetaDestino })
+  });
+  if (!res.ok) throw new Error('No se pudo mover el archivo.');
+}
+
+
 // ------------------- FUNCIONES DE AUTENTICACIÓN -------------------
 
 // Llama al endpoint para registrar un nuevo usuario
