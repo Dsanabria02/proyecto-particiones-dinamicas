@@ -1,15 +1,24 @@
 package server.fs;
 
 import org.springframework.stereotype.Service;
-import java.time.format.DateTimeFormatter;
 import server.users.User;
+
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class FileManager {
-    
+
     // ------------- CREAR ARCHIVOS ---------------------------
 
-    // Crear archivos
+    public void createFile(User user, String name, String extension, String content) {
+        // Crear archivo dentro del actual directorio
+        DirectoryNode current = user.getCurrentDirectory();
+        if (current.getChild(name) != null)
+            throw new RuntimeException("Archivo ya existe");
+        current.addChild(new FileNode(name, extension, content));
+    }
+
+    // Crear archivos con sobreescritura
     public void createFile(User user, String name, String extension, String content, boolean overwrite) {
         DirectoryNode current = user.getCurrentDirectory();
         Node existing = current.getChild(name);
@@ -23,7 +32,15 @@ public class FileManager {
         current.addChild(new FileNode(name, extension, content));
     }
 
-    // Crear directorios
+    public void createDirectory(User user, String name) {
+        // Crear un directorio dentro del actual directorio
+        DirectoryNode current = user.getCurrentDirectory();
+        if (current.getChild(name) != null)
+            throw new RuntimeException("Directorio ya existe");
+        current.addChild(new DirectoryNode(name));
+    }
+
+    // Crear directorios con sobreescritura
     public void createDirectory(User user, String name, boolean overwrite) {
         DirectoryNode current = user.getCurrentDirectory();
         Node existing = current.getChild(name);
@@ -37,14 +54,21 @@ public class FileManager {
         current.addChild(new DirectoryNode(name));
     }
 
-
     // -----------------------------------------------------------------------------
-
 
     // --------- NAVEGAR DIRECTORIOS ---------------------------------
 
-    // Cambio de directorio
-    public String changeDirectory(User user, String name) {
+    public void changeDirectory(User user, String name) {
+        // Cambiarse a otro directorio
+        Node next = user.getCurrentDirectory().getChild(name);
+        if (next != null && next.isDirectory())
+            user.setCurrentDirectory((DirectoryNode) next);
+        else
+            throw new RuntimeException("Directorio no encontrado");
+    }
+
+    // Cambio de directorio con retorno de path (versión extendida)
+    public String changeDirectoryWithPath(User user, String name) {
         Node next = user.getCurrentDirectory().getChild(name);
         if (next != null && next.isDirectory()) {
             user.setCurrentDirectory((DirectoryNode) next);
@@ -60,7 +84,6 @@ public class FileManager {
     }
 
     // --------------------------------------------------------------------------------
-
 
     public String listDirectory(User user) {
         // Mostrar lista de directorios
@@ -89,8 +112,10 @@ public class FileManager {
     }
 
     // --------------- VER PROPIEDADES -----------------------------------
+
     private String formatSize(long bytes) {
-        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024)
+            return bytes + " B";
         int exp = (int) (Math.log(bytes) / Math.log(1024));
         char unit = "KMGTPE".charAt(exp - 1);
         double size = bytes / Math.pow(1024, exp);
@@ -98,6 +123,7 @@ public class FileManager {
     }
 
     public String fileProperties(User user, String name) {
+        // Mostrar propiedades del archivo o directorio
         Node n = user.getCurrentDirectory().getChild(name);
         if (n == null)
             throw new RuntimeException("Archivo o directorio no encontrado");
@@ -106,21 +132,19 @@ public class FileManager {
 
         if (n instanceof FileNode file) {
             return String.format(
-                "Nombre: %s\nTamaño: %s\nCreado: %s\nModificado: %s\nExtensión: %s",
-                file.getName(),
-                formatSize(file.getSize()),
-                file.getCreated().format(formatter),
-                file.getModified().format(formatter),
-                file.getExtension()
-            );
+                    "Nombre: %s\nTamaño: %s\nCreado: %s\nModificado: %s\nExtensión: %s",
+                    file.getName(),
+                    formatSize(file.getSize()),
+                    file.getCreated().format(formatter),
+                    file.getModified().format(formatter),
+                    file.getExtension());
         } else {
             return String.format(
-                "Nombre: %s\nTamaño: %s\nCreado: %s\nModificado: %s",
-                n.getName(),
-                formatSize(n.getSize()),
-                n.getCreated().format(formatter),
-                n.getModified().format(formatter)
-            );
+                    "Nombre: %s\nTamaño: %s\nCreado: %s\nModificado: %s",
+                    n.getName(),
+                    formatSize(n.getSize()),
+                    n.getCreated().format(formatter),
+                    n.getModified().format(formatter));
         }
     }
 
@@ -130,28 +154,36 @@ public class FileManager {
     }
 
     public void copy(User user, String name, String targetDirName) {
-        // Copiar archivo
         Node original = user.getCurrentDirectory().getChild(name);
-        DirectoryNode target = (DirectoryNode) user.getCurrentDirectory().getChild(targetDirName);
-        if (original != null && target != null && target.isDirectory()) {
-            if (original instanceof FileNode file) {
-                target.addChild(new FileNode(file.getName(), file.getExtension(), file.getContent()));
-            }
+        Node targetNode = user.getCurrentDirectory().getChild(targetDirName);
+
+        if (original == null)
+            throw new RuntimeException("Archivo a copiar no encontrado");
+
+        if (!(targetNode instanceof DirectoryNode target))
+            throw new RuntimeException("El destino no es un directorio");
+
+        if (original instanceof FileNode file) {
+            target.addChild(new FileNode(file.getName(), file.getExtension(), file.getContent()));
+        } else if (original instanceof DirectoryNode dir) {
+            target.addChild(cloneDirectory(dir));
         } else {
-            throw new RuntimeException("Archivo o directorio destino inválido");
+            throw new RuntimeException("Tipo de nodo no soportado");
         }
     }
 
     public void move(User user, String name, String targetDirName) {
-        // Mover archivo
         Node node = user.getCurrentDirectory().getChild(name);
-        DirectoryNode target = (DirectoryNode) user.getCurrentDirectory().getChild(targetDirName);
-        if (node != null && target != null && target.isDirectory()) {
-            user.getCurrentDirectory().removeChild(name);
-            target.addChild(node);
-        } else {
-            throw new RuntimeException("Movimiento inválido");
-        }
+        Node targetNode = user.getCurrentDirectory().getChild(targetDirName);
+
+        if (node == null)
+            throw new RuntimeException("Archivo o directorio a mover no encontrado");
+
+        if (!(targetNode instanceof DirectoryNode target))
+            throw new RuntimeException("El destino no es un directorio");
+
+        user.getCurrentDirectory().removeChild(name);
+        target.addChild(node);
     }
 
     public void share(User fromUser, String name, User toUser) {
