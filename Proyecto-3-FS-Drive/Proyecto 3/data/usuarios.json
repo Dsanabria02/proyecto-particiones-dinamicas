@@ -1,1 +1,80 @@
-{"Diana":"1234","TB":"contra","mari0502":"1234"}
+{
+  "dia": {
+    "username": "dia",
+    "password": "12345",
+    "maxSize": 10240,
+    "root": {
+      "children": [
+        {
+          "extension": "txt",
+          "content": "Hola esto es una preuba",
+          "name": "diana prueba",
+          "created": "2025-06-28T21:16:46.097865",
+          "modified": "2025-06-28T21:16:46.097865",
+          "size": 23,
+          "type": "file"
+        },
+        {
+          "children": [],
+          "name": "Prueba 1",
+          "created": "2025-06-28T21:17:29.929375300",
+          "modified": "2025-06-28T21:17:29.929375300",
+          "size": 0,
+          "type": "directory"
+        },
+        {
+          "children": [],
+          "name": "Prueba 2",
+          "created": "2025-06-28T21:17:36.674172400",
+          "modified": "2025-06-28T21:17:36.675169400",
+          "size": 0,
+          "type": "directory"
+        }
+      ],
+      "name": "root",
+      "created": "2025-06-28T20:34:50.365083800",
+      "modified": "2025-06-28T20:34:50.365083800",
+      "size": 0
+    },
+    "shared": {
+      "children": [],
+      "name": "shared",
+      "created": "2025-06-28T20:34:50.365083800",
+      "modified": "2025-06-28T20:34:50.365083800",
+      "size": 0
+    },
+    "currentDirectory": {
+      "children": [
+        {
+          "extension": "txt",
+          "content": "Hola esto es una preuba",
+          "name": "diana prueba",
+          "created": "2025-06-28T21:16:46.097865",
+          "modified": "2025-06-28T21:16:46.097865",
+          "size": 23,
+          "type": "file"
+        },
+        {
+          "children": [],
+          "name": "Prueba 1",
+          "created": "2025-06-28T21:17:29.929375300",
+          "modified": "2025-06-28T21:17:29.929375300",
+          "size": 0,
+          "type": "directory"
+        },
+        {
+          "children": [],
+          "name": "Prueba 2",
+          "created": "2025-06-28T21:17:36.674172400",
+          "modified": "2025-06-28T21:17:36.675169400",
+          "size": 0,
+          "type": "directory"
+        }
+      ],
+      "name": "root",
+      "created": "2025-06-28T20:34:50.365083800",
+      "modified": "2025-06-28T20:34:50.365083800",
+      "size": 0
+    }
+  }
+}
