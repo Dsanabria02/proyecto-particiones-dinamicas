@@ -9,13 +9,17 @@ import {
   mostrarRuta,
   verificarExistencia,
   loginUsuario,
-  registrarUsuario
+  registrarUsuario,
+  compartirArchivoAPI,
+  listSharedFiles,
+  verArchivoCompartidoAPI
 } from "./api.js";
 
 let usuarioActual = "";
 let contrasenaActual = "";
 let elementoAEliminar = { nombre: "", tipo: "" };
 let archivoEditando = "";
+let nombreACompartir = "";
 
 // --- SESIÓN ---
 window.iniciarSesion = function () {
@@ -89,7 +93,7 @@ export function refrescar() {
     });
 }
 
-function mostrarArchivos(textoPlano) {
+function mostrarArchivos(textoPlano, esCompartido = false) {
   const tabla = document.getElementById("tabla-archivos");
   tabla.innerHTML = "";
 
@@ -98,30 +102,48 @@ function mostrarArchivos(textoPlano) {
     const esFile = linea.startsWith("[FILE]");
     const esDir = linea.startsWith("[DIR]");
     const tipo = esDir ? "directorio" : "archivo";
-
     const nombreReal = linea.replace("[FILE] ", "").replace("[DIR] ", "");
 
     const fila = document.createElement("tr");
+
+    let acciones = "";
+
+    if (tipo === "directorio") {
+      if (!esCompartido) {
+        acciones = `
+          <button onclick="cambiarDirectorio('${nombreReal}')">Entrar</button>
+          <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
+          <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>
+        `;
+      } else {
+        acciones = ""; // Carpeta compartida: sin acciones
+      }
+    } else {
+      if (esCompartido) {
+        acciones = `
+          <button onclick="verArchivoCompartido('${nombreReal}')">Ver</button>
+        `;
+      } else {
+        acciones = `
+          <button onclick="verArchivo('${nombreReal}')">Ver</button>
+          <button onclick="editarArchivo('${nombreReal}')">Editar</button>
+          <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
+          <button onclick="descargarArchivo('${nombreReal}')">Descargar</button>
+          <button onclick="abrirModalCompartir('${nombreReal}')">Compartir</button>
+          <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>
+        `;
+      }
+    }
+
     fila.innerHTML = `
       <td>${linea}</td>
       <td>${tipo}</td>
-      <td>
-        ${
-          tipo === "directorio"
-            ? `<button onclick="cambiarDirectorio('${nombreReal}')">Entrar</button>
-               <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
-               <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>`
-            : `<button onclick="verArchivo('${nombreReal}')">Ver</button>
-               <button onclick="editarArchivo('${nombreReal}')">Editar</button>
-               <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
-               <button onclick="descargarArchivo('${nombreReal}')">Descargar</button>
-               <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>`
-        }
-      </td>
+      <td>${acciones}</td>
     `;
     tabla.appendChild(fila);
   });
 }
+
 
 function manejarUploadArchivo() {
   const input = document.getElementById("file-uploader");
@@ -242,6 +264,48 @@ window.subirUnNivel = function () {
   cambiarDirectorioAPI(usuarioActual, "..").then(() => refrescar());
 };
 
+// Llamado desde el botón "Compartir"
+window.abrirModalCompartir = function(nombre) {
+  nombreACompartir = nombre;
+  document.getElementById("input-usuario-destino").value = "";
+  abrirModal("modal-compartir");
+};
+
+// Confirmación al presionar "Compartir"
+window.confirmarCompartir = function () {
+  const destino = document.getElementById("input-usuario-destino").value.trim();
+  if (!destino) {
+    mostrarMensaje("Debe ingresar el nombre del usuario destinatario.");
+    return;
+  }
+
+  compartirArchivoAPI(usuarioActual, destino, nombreACompartir)
+    .then(() => {
+      mostrarMensaje("Compartido con éxito.");
+      cerrarModal("modal-compartir");
+    })
+    .catch(err => {
+      mostrarMensaje("Error al compartir: " + err.message);
+      cerrarModal("modal-compartir");
+    });
+};
+
+window.verCompartidos = function () {
+  listSharedFiles(usuarioActual)
+    .then(content => {
+      mostrarArchivos(content, true);  // le pasamos true para indicar que son compartidos
+    })
+    .catch(err => {
+      mostrarMensaje("Error al cargar compartidos: " + err.message);
+    });
+};
+
+
+window.verArchivoCompartido = function (nombre) {
+  verArchivoCompartidoAPI(usuarioActual, nombre)
+    .then(contenido => mostrarMensaje("Contenido del archivo compartido:\n" + contenido))
+    .catch(err => mostrarMensaje("Error al ver archivo compartido: " + err.message));
+};
 
 // --- ELIMINACIÓN CON CONFIRMACIÓN ---
 window.mostrarConfirmacionEliminar = function (nombre, tipo) {
@@ -263,6 +327,12 @@ window.confirmarEliminar = function () {
 };
 
 // --- MODALES GENÉRICOS ---
+
+window.abrirModal = function (id) {
+  document.getElementById(id).style.display = "flex";
+};
+
+
 window.abrirModalArchivo = function () {
   document.getElementById("modal-archivo").style.display = "flex";
 };
