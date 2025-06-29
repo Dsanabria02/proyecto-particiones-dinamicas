@@ -121,9 +121,32 @@
     </div>
   </div>
 
+  <!-- Modal Copiar o Mover -->
+  <div id="modal-copiar-mover" class="modal">
+    <div class="modal-content">
+      <h3>¿Qué acción deseas realizar?</h3>
+      <p id="modal-copiar-mover-nombre" style="font-weight: bold;"></p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button onclick="handleCopy()" style="flex:1;">Copiar</button>
+        <button onclick="handleMove()" style="flex:1; background-color:#34a853;">Mover</button>
+      </div>
+      <button onclick="closeModalCopiarMover()" style="margin-top:10px;">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal para seleccionar carpeta destino (copiar o mover) -->
+  <div class="modal" id="modal-operacion">
+    <div class="modal-content">
+      <h3 id="titulo-operacion">Operación</h3>
+      <label for="select-carpeta">Seleccioná carpeta de destino:</label>
+      <select id="select-carpeta"></select>
+      <button onclick="confirmarOperacion()">Confirmar</button>
+      <button onclick="cerrarModal('modal-operacion')">Cancelar</button>
+    </div>
+  </div>
+
   <!-- Scripts principales -->
   <script type="module" src="api.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
-
