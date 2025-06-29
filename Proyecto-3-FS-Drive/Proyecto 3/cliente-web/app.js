@@ -12,6 +12,8 @@ import {
   registrarUsuario,
   compartirArchivoAPI,
   listSharedFiles,
+  copiarArchivoAPI,
+  moverArchivoAPI,
   verArchivoCompartidoAPI
 } from "./api.js";
 
@@ -20,6 +22,9 @@ let contrasenaActual = "";
 let elementoAEliminar = { nombre: "", tipo: "" };
 let archivoEditando = "";
 let nombreACompartir = "";
+let nombreAMoverOCopiar = "";
+let tipoOperacion = "";
+let selectedFile = "";
 
 // --- SESIÓN ---
 window.iniciarSesion = function () {
@@ -87,7 +92,7 @@ export function refrescar() {
       return;
     };
     
-    mostrarRuta(usuarioActual); // ✅ Mostrar la ruta antes o después de listar
+    mostrarRuta(usuarioActual); // Mostrar la ruta antes o después de listar
     listarArchivos(usuarioActual).then(data => {
       mostrarArchivos(data);
     });
@@ -115,14 +120,10 @@ function mostrarArchivos(textoPlano, esCompartido = false) {
           <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
           <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'directorio')">Eliminar</button>
         `;
-      } else {
-        acciones = ""; // Carpeta compartida: sin acciones
       }
     } else {
       if (esCompartido) {
-        acciones = `
-          <button onclick="verArchivoCompartido('${nombreReal}')">Ver</button>
-        `;
+        acciones = `<button onclick="verArchivoCompartido('${nombreReal}')">Ver</button>`;
       } else {
         acciones = `
           <button onclick="verArchivo('${nombreReal}')">Ver</button>
@@ -131,6 +132,7 @@ function mostrarArchivos(textoPlano, esCompartido = false) {
           <button onclick="descargarArchivo('${nombreReal}')">↓</button>
           <button onclick="abrirModalCompartir('${nombreReal}')">Compartir</button>
           <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>
+          <button onclick="abrirMenuOpciones('${nombreReal}')">⋮</button>
         `;
       }
     }
@@ -140,6 +142,7 @@ function mostrarArchivos(textoPlano, esCompartido = false) {
       <td>${tipo}</td>
       <td>${acciones}</td>
     `;
+
     tabla.appendChild(fila);
   });
 }
@@ -301,11 +304,108 @@ window.verCompartidos = function () {
     });
 };
 
-
 window.verArchivoCompartido = function (nombre) {
   verArchivoCompartidoAPI(usuarioActual, nombre)
     .then(contenido => mostrarMensaje("Contenido del archivo compartido:\n" + contenido))
     .catch(err => mostrarMensaje("Error al ver archivo compartido: " + err.message));
+};
+
+
+window.abrirMenuOpciones = function(nombre) {
+  nombreAMoverOCopiar = nombre;
+  showCopiarMoverModal(nombre);
+};
+
+window.showCopiarMoverModal = function (nombreArchivo) {
+  selectedFile = nombreArchivo;
+  document.getElementById("modal-copiar-mover-nombre").textContent = nombreArchivo;
+  document.getElementById("modal-copiar-mover").style.display = "flex";
+};
+
+window.closeModalCopiarMover = function () {
+  document.getElementById("modal-copiar-mover").style.display = "none";
+};
+
+window.handleCopy = function () {
+  tipoOperacion = "copiar";
+  closeModalCopiarMover();
+  prepararYMostrarSelector(selectedFile);
+};
+
+window.handleMove = function () {
+  tipoOperacion = "mover";
+  closeModalCopiarMover();
+  prepararYMostrarSelector(selectedFile);
+};
+
+async function prepararYMostrarSelector(nombreArchivo) {
+  // Guardar el archivo actual
+  nombreAMoverOCopiar = nombreArchivo;
+
+  // Obtener las carpetas disponibles
+  const res = await fetch(`/api/fs/folders?username=${usuarioActual}`);
+  const carpetas = await res.json();
+
+  // Poblar el combo de carpetas
+  const select = document.getElementById("select-carpeta");
+  select.innerHTML = "";
+  carpetas.forEach(c => {
+  const option = document.createElement("option");
+  option.value = c;
+  option.textContent = c;
+  select.appendChild(option);
+  });
+
+
+  // Mostrar modal final con selector de destino
+  document.getElementById("titulo-operacion").textContent = `${tipoOperacion === 'copiar' ? 'Copiar' : 'Mover'} archivo`;
+  abrirModal("modal-operacion");
+}
+
+window.confirmarOperacion = async function() {
+  const destino = document.getElementById("select-carpeta").value;
+  try {
+    if (tipoOperacion === "copiar") {
+      await copiarArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
+    } else {
+      await moverArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
+    }
+    cerrarModal("modal-operacion");
+    refrescar();
+    if (tipoOperacion === "copiar") {
+      await copiarArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
+    } else {
+      await moverArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
+    }
+    if (tipoOperacion === "copiar") {
+      mostrarMensaje(`Archivo copiado con éxito.`);
+    } else {
+      mostrarMensaje(`Archivo movido con éxito.`);
+    }
+  } catch (err) {
+    mostrarMensaje("Error al ejecutar la operación: " + err.message);
+  }
+};
+
+
+window.confirmarOperacion = async function() {
+  const destino = document.getElementById("select-carpeta").value;
+  try {
+    if (tipoOperacion === "copiar") {
+      await copiarArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
+    } else {
+      await moverArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
+    }
+    cerrarModal("modal-operacion");
+    refrescar();
+    if (tipoOperacion === "copiar") {
+      mostrarMensaje(`Archivo copiado con éxito.`);
+    } else {
+      mostrarMensaje(`Archivo movido con éxito.`);
+    }
+  } catch (err) {
+    mostrarMensaje("Error al ejecutar la operación: " + err.message);
+  }
 };
 
 // --- ELIMINACIÓN CON CONFIRMACIÓN ---
@@ -356,4 +456,3 @@ window.onload = function () {
   mostrarLogin();
   manejarUploadArchivo(); // ← activar escucha de subida
 };
-
