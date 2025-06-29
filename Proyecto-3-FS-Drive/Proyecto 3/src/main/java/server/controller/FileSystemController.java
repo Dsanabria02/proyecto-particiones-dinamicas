@@ -21,36 +21,23 @@ public class FileSystemController {
 
     @PostMapping("/create-file")
     public String createFile(@RequestBody CreateFileRequest req) {
-        User user = users.login(req.username());
-        fs.createFile(user, req.name(), req.extension(), req.content(), req.overwrite());
+        User user = users.getUser(req.username());
+        fs.createFile(user, req.name(), req.extension(), req.content());
         users.save(user);
         return "Archivo creado";
     }
 
     @PostMapping("/create-directory")
     public String createDirectory(@RequestBody CreateDirectoryRequest req) {
-        User user = users.login(req.username());
-        fs.createDirectory(user, req.name(), req.overwrite());
+        User user = users.getUser(req.username());
+        fs.createDirectory(user, req.name());
         users.save(user);
         return "Directorio creado";
     }
 
-    @GetMapping("/exists")
-    public boolean exists(@RequestParam String username, @RequestParam String name) {
-        User user = users.login(username);
-        return user.getCurrentDirectory().getChild(name) != null;
-    }
-
-    @GetMapping("/path")
-    public String getCurrentPath(@RequestParam String username) {
-        User user = users.login(username);
-        return fs.getCurrentPath(user);
-    }
-
-
     @PostMapping("/change-directory")
     public String changeDirectory(@RequestBody ChangeDirectoryRequest req) {
-        User user = users.login(req.username());
+        User user = users.getUser(req.username());
         fs.changeDirectory(user, req.name());
         users.save(user);
         return "Directorio cambiado";
@@ -58,43 +45,33 @@ public class FileSystemController {
 
     @GetMapping("/list")
     public String list(@RequestParam String username) {
-        User user = users.login(username);
+        User user = users.getUser(username);
         return fs.listDirectory(user);
     }
 
     @GetMapping("/view-file")
     public String viewFile(@RequestParam String username, @RequestParam String name) {
-        User user = users.login(username);
+        User user = users.getUser(username);
         return fs.viewFile(user, name);
     }
 
     @PutMapping("/modify-file")
     public String modifyFile(@RequestBody ModifyFileRequest req) {
-        User user = users.login(req.username());
+        User user = users.getUser(req.username());
         fs.modifyFile(user, req.name(), req.content());
         users.save(user);
         return "Archivo modificado";
     }
 
-    @GetMapping("/view-properties")
-    public ResponseEntity<String> fileProperties(@RequestParam String username, @RequestParam String name) {
-    try {
-        User user = users.login(username);
-        String props = fs.fileProperties(user, name);
-        return ResponseEntity.ok(props);
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body("Archivo o directorio no encontrado: " + e.getMessage());
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error inesperado: " + e.getMessage());
+    @GetMapping("/properties")
+    public String fileProperties(@RequestParam String username, @RequestParam String name) {
+        User user = users.getUser(username);
+        return fs.fileProperties(user, name);
     }
-}
-
 
     @PostMapping("/delete")
     public String delete(@RequestBody DeleteRequest req) {
-        User user = users.login(req.username);
+        User user = users.getUser(req.username);
         fs.delete(user, req.name);
         users.save(user);
         return "Eliminado";
@@ -102,7 +79,7 @@ public class FileSystemController {
 
     @PostMapping("/copy")
     public String copy(@RequestBody MoveCopyRequest req) {
-        User user = users.login(req.username());
+        User user = users.getUser(req.username());
         fs.copy(user, req.name(), req.targetDir());
         users.save(user);
         return "Copiado";
@@ -110,7 +87,7 @@ public class FileSystemController {
 
     @PostMapping("/move")
     public String move(@RequestBody MoveCopyRequest req) {
-        User user = users.login(req.username());
+        User user = users.getUser(req.username());
         fs.move(user, req.name(), req.targetDir());
         users.save(user);
         return "Movido";
@@ -118,16 +95,45 @@ public class FileSystemController {
 
     @PostMapping("/share")
     public String share(@RequestBody ShareRequest req) {
-        User from = users.login(req.fromUser());
-        User to = users.login(req.toUser());
+        User from = users.getUser(req.fromUser());
+        User to = users.getUser(req.toUser());
         fs.share(from, req.name(), to);
         users.save(to);
         return "Compartido";
     }
 
-    // Clase interna o externa si lo preferís (para mapear el body del delete)
+    // Agregado desde la versión de tu compañera
+
+    @GetMapping("/exists")
+    public boolean exists(@RequestParam String username, @RequestParam String name) {
+        User user = users.getUser(username);
+        return user.getCurrentDirectory().getChild(name) != null;
+    }
+
+    @GetMapping("/path")
+    public String getCurrentPath(@RequestParam String username) {
+        User user = users.getUser(username);
+        return fs.getCurrentPath(user);
+    }
+
+    @GetMapping("/view-properties")
+    public ResponseEntity<String> filePropertiesView(@RequestParam String username, @RequestParam String name) {
+        try {
+            User user = users.getUser(username);
+            String props = fs.fileProperties(user, name);
+            return ResponseEntity.ok(props);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Archivo o directorio no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error inesperado: " + e.getMessage());
+        }
+    }
+
     public static class DeleteRequest {
         public String username;
         public String name;
     }
 }
+
