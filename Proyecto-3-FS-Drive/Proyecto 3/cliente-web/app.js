@@ -114,11 +114,41 @@ function mostrarArchivos(textoPlano) {
             : `<button onclick="verArchivo('${nombreReal}')">Ver</button>
                <button onclick="editarArchivo('${nombreReal}')">Editar</button>
                <button onclick="verPropiedades('${nombreReal}')">Propiedades</button>
+               <button onclick="descargarArchivo('${nombreReal}')">Descargar</button>
                <button onclick="mostrarConfirmacionEliminar('${nombreReal}', 'archivo')">Eliminar</button>`
         }
       </td>
     `;
     tabla.appendChild(fila);
+  });
+}
+
+function manejarUploadArchivo() {
+  const input = document.getElementById("file-uploader");
+
+  input.addEventListener("change", async function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const nombre = file.name.split('.').slice(0, -1).join('.');
+    const extension = file.name.split('.').pop();
+    const contenido = await file.text();
+
+    const existe = await verificarExistencia(usuarioActual, nombre);
+    let overwrite = false;
+
+    if (existe) {
+      overwrite = confirm("Ya existe un archivo/directorio con ese nombre. ¿Deseás reemplazarlo?");
+      if (!overwrite) return;
+    }
+
+    crearArchivoAPI(usuarioActual, nombre, extension, contenido, overwrite).then(() => {
+      refrescar();
+      mostrarMensaje("Archivo subido con éxito.");
+    });
+
+    // Limpiar input para permitir subir el mismo archivo de nuevo si se desea
+    input.value = "";
   });
 }
 
@@ -247,4 +277,8 @@ window.mostrarMensaje = function (texto) {
 };
 
 // --- INICIALIZACIÓN ---
-window.onload = mostrarLogin;
+window.onload = function () {
+  mostrarLogin();
+  manejarUploadArchivo(); // ← activar escucha de subida
+};
+

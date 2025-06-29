@@ -40,6 +40,8 @@
       <div>
         <button onclick="abrirModalArchivo()">+ Crear archivo</button>
         <button onclick="abrirModalCarpeta()">+ Crear carpeta</button>
+        <input type="file" id="file-uploader" style="display: none" />
+        <button onclick="document.getElementById('file-uploader').click()">↑ Subir archivo</button>
         <button onclick="refrescar()">⟳</button>
         <button onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
@@ -87,7 +89,7 @@
   <!-- Modal de mensaje -->
   <div class="modal" id="modal-mensaje">
     <div class="modal-content">
-      <p id="mensaje-texto"></p>
+      <div id="mensaje-texto" style="max-height: 200px; overflow-y: auto; margin-bottom: 1em;"></div>
       <button onclick="cerrarModal('modal-mensaje')">Aceptar</button>
     </div>
   </div>
