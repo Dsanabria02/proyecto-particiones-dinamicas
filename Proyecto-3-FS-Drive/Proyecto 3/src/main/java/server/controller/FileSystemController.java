@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import server.fs.FileManager;
 import server.users.User;
 import server.users.UserManager;
+import java.util.List;
+import server.fs.Node;
+
 
 @RestController
 @RequestMapping("/api/fs")
@@ -93,16 +96,40 @@ public class FileSystemController {
         return "Movido";
     }
 
+
     @PostMapping("/share")
-    public String share(@RequestBody ShareRequest req) {
+    public ResponseEntity<String> share(@RequestBody ShareRequest req) {
         User from = users.getUser(req.fromUser());
         User to = users.getUser(req.toUser());
-        fs.share(from, req.name(), to);
-        users.save(to);
-        return "Compartido";
+
+        if (from == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario origen no existe");
+
+        if (to == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario destino no existe");
+
+        try {
+            fs.share(from, req.name(), to);
+            users.save(to);
+            return ResponseEntity.ok("Compartido");
+        } catch (Exception e) {
+            System.out.println("Error al compartir: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se pudo compartir el archivo.");
+        }
     }
 
-    // Agregado desde la versión de tu compañera
+    @GetMapping("/shared")
+    public String listShared(@RequestParam String username) {
+        User user = users.getUser(username);
+        return fs.listShared(user);
+    }
+
+    @GetMapping("/view-shared-file")
+    public String viewSharedFile(@RequestParam String username, @RequestParam String name) {
+        User user = users.getUser(username);
+        return fs.viewSharedFile(user, name);
+    }
+
 
     @GetMapping("/exists")
     public boolean exists(@RequestParam String username, @RequestParam String name) {
@@ -124,10 +151,10 @@ public class FileSystemController {
             return ResponseEntity.ok(props);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Archivo o directorio no encontrado: " + e.getMessage());
+                    .body("Archivo o directorio no encontrado: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error inesperado: " + e.getMessage());
+                    .body("Error inesperado: " + e.getMessage());
         }
     }
 
