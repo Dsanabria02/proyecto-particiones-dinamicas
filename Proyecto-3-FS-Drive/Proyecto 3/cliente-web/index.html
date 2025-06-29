@@ -48,6 +48,7 @@
         <input type="file" id="file-uploader" style="display: none" />
         <button onclick="document.getElementById('file-uploader').click()">↑ Subir archivo</button>
         <button onclick="refrescar()">⟳</button>
+        <button onclick="verCompartidos()">⌘ Compartidos</button>
         <button onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
       
@@ -105,8 +106,18 @@
     <div class="modal-content">
       <h3>¿Estás seguro de eliminar este archivo?</h3>
       <p id="texto-confirmacion"></p>
-      <button onclick="confirmarEliminacion()">Sí, eliminar</button>
+      <button onclick="confirmarEliminar()">Sí, eliminar</button
       <button onclick="cerrarModal('modal-confirmar-eliminar')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal para compartir archivo o carpeta -->
+  <div class="modal" id="modal-compartir">
+    <div class="modal-content">
+      <h3>Compartir con otro usuario</h3>
+      <input type="text" id="input-usuario-destino" placeholder="Nombre del usuario destinatario" />
+      <button onclick="confirmarCompartir()">Compartir</button>
+      <button onclick="cerrarModal('modal-compartir')">Cancelar</button>
     </div>
   </div>
 
