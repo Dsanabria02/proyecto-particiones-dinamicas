@@ -171,8 +171,41 @@ public class FileManager {
     }
 
     public void delete(User user, String name) {
-        // Eliminar archivo del actual directorio
-        user.getCurrentDirectory().removeChild(name);
+        DirectoryNode currentDir = user.getCurrentDirectory();
+        Node nodeToDelete = currentDir.getChild(name);
+    
+        if (nodeToDelete == null) {
+            throw new IllegalArgumentException("Archivo o directorio no encontrado: " + name);
+        }
+    
+        if (nodeToDelete.isDirectory()) {
+            // Es un DirectoryNode - eliminar en cascada
+            DirectoryNode dirToDelete = (DirectoryNode) nodeToDelete;
+            deleteDirectoryRecursively(dirToDelete);
+            user.getCurrentDirectory().removeChild(name);
+        } else {
+            // Es un FileNode - eliminación simple
+            user.getCurrentDirectory().removeChild(name);
+        }
+    }
+
+    /**
+    * Método auxiliar para eliminar recursivamente el contenido de un directorio
+     */
+    private void deleteDirectoryRecursively(DirectoryNode directory) {
+        // Crear copia para evitar ConcurrentModificationException
+        List<Node> childrenCopy = new ArrayList<>(directory.getChildren());
+    
+        for (Node child : childrenCopy) {
+            if (child.isDirectory()) {
+                // Es un subdirectorio - llamada recursiva
+                deleteDirectoryRecursively((DirectoryNode) child);
+                directory.removeChild(child.getName());
+            } else {
+                // Es un archivo - eliminar directamente
+                directory.removeChild(child.getName());
+            }
+        }
     }
 
     public void copy(User user, String name, String targetDirName) {
