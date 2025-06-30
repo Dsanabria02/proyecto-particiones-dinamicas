@@ -1,6 +1,7 @@
 package server.users;
 
 import server.fs.DirectoryNode;
+import server.fs.Node;
 
 public class User {
     private String username;
@@ -89,4 +90,19 @@ public class User {
         return getShared();
     }
 
+    public int getEspacioUtilizado() {
+        return calcularEspacio(this.root);
+    }
+
+    private int calcularEspacio(DirectoryNode dir) {
+        int total = 0;
+        for (Node child : dir.getChildren()) {
+            if (child.isDirectory()) {
+                total += calcularEspacio((DirectoryNode) child); // recursivo
+            } else {
+                total += child.getSize(); // archivo
+            }
+        }
+        return total;
+    }
 }
