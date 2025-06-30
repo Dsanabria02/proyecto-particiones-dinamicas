@@ -63,6 +63,7 @@ public class FileManager {
 
     public void changeDirectory(User user, String name) {
         System.out.println("Intentando cambiar de directorio a: " + name);
+    
         if ("..".equals(name)) {
             DirectoryNode current = user.getCurrentDirectory();
             DirectoryNode parent = current.getParent();
@@ -72,6 +73,9 @@ public class FileManager {
             } else {
                 System.out.println("Ya estás en el directorio raíz, no se puede subir más.");
             }
+        } else if ("root".equals(name)) {
+            user.setCurrentDirectory(user.getRootDirectory());
+            System.out.println("Cambiado al directorio raíz.");
         } else {
             Node next = user.getCurrentDirectory().getChild(name);
             if (next != null && next.isDirectory()) {
@@ -82,8 +86,10 @@ public class FileManager {
                 throw new RuntimeException("Directorio no encontrado");
             }
         }
+
         System.out.println("Directorio actual: " + user.getCurrentDirectory().getName());
     }
+
 
     // Cambio de directorio con retorno de path (versión extendida)
     public String changeDirectoryWithPath(User user, String name) {

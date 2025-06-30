@@ -97,18 +97,10 @@ export function refrescar() {
   // Mostrar ruta actual
   mostrarRuta(usuarioActual);
 
-  // Verificamos si estamos navegando en una carpeta compartida
-  if (window.navegandoEnCompartidos) {
-    listarArchivosCompartidos(usuarioActual).then(data => {
-      mostrarArchivos(data);
-    });
-  } else {
-    listarArchivos(usuarioActual).then(data => {
-      mostrarArchivos(data);
-    });
-  }
+  listarArchivos(usuarioActual).then(data => {
+    mostrarArchivos(data);
+  });
 }
-
 
 function mostrarArchivos(textoPlano, esCompartido = false) {
   const tabla = document.getElementById("tabla-archivos");
@@ -263,6 +255,7 @@ window.crearDirectorioDesdeModal = async function () {
 // --- ACCIONES CON ARCHIVOS ---
 window.cambiarDirectorio = function (nombre) {
   enModoCompartido = false;
+  console.log(nombre)
   cambiarDirectorioAPI(usuarioActual, nombre).then(() => refrescar());
 };
 
@@ -311,6 +304,10 @@ window.subirUnNivel = function () {
   cambiarDirectorioAPI(usuarioActual, "..").then(() => refrescar());
 };
 
+window.irARaiz = function () {
+  enModoCompartido = false;
+  cambiarDirectorioAPI(usuarioActual, "root").then(() => refrescar());
+};
 
 // Llamado desde el botón "Compartir"
 window.abrirModalCompartir = function(nombre) {
