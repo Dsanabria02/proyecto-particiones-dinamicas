@@ -107,5 +107,13 @@ public abstract class Node {
 
         return pathBuilder.toString();
     }
-}
 
+    public String getProperties() {
+        return "Nombre: " + name + "\n" +
+                "Tamaño: " + size + " bytes\n" +
+                "Creado: " + created + "\n" +
+                "Modificado: " + modified + "\n" +
+                "Ruta: " + getPath();
+    }
+
+}
