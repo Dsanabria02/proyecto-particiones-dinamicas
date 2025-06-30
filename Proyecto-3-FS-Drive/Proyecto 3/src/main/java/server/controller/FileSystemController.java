@@ -11,9 +11,6 @@ import server.fs.Node;
 import java.util.Map;
 
 
-
-
-    
 @RestController
 @RequestMapping("/api/fs")
 public class FileSystemController {
@@ -59,7 +56,11 @@ public class FileSystemController {
     @GetMapping("/view-file")
     public String viewFile(@RequestParam String username, @RequestParam String name) {
         User user = users.getUser(username);
-        return fs.viewFile(user, name);
+        try {
+            return fs.viewFile(user, name);
+        } catch (RuntimeException e) {
+            return fs.viewFileFromShared(user, name);
+        }
     }
 
     @PutMapping("/modify-file")
@@ -73,21 +74,35 @@ public class FileSystemController {
     @GetMapping("/properties")
     public String fileProperties(@RequestParam String username, @RequestParam String name) {
         User user = users.getUser(username);
-        return fs.fileProperties(user, name);
+        try {
+            return fs.fileProperties(user, name);
+        } catch (RuntimeException e) {
+            return fs.filePropertiesFromShared(user, name);
+        }
     }
+
 
     @PostMapping("/delete")
     public String delete(@RequestBody DeleteRequest req) {
         User user = users.getUser(req.username);
-        fs.delete(user, req.name);
+        try {
+            fs.delete(user, req.name);
+        } catch (RuntimeException e) {
+            fs.deleteFromShared(user, req.name);
+        }
         users.save(user);
-        return "Eliminado";
+        return "Eliminado correctamente";
     }
 
     @PostMapping("/copy")
     public String copy(@RequestBody MoveCopyRequest req) {
         User user = users.getUser(req.username());
-        fs.copy(user, req.name(), req.targetFolder()); // <-- aquí
+        try {
+            fs.copy(user, req.name(), req.targetFolder());
+        } catch (RuntimeException e) {
+            fs.copyFromShared(user, req.name(), req.targetFolder());
+        }
+
         users.save(user);
         return "Copiado";
     }
@@ -95,7 +110,11 @@ public class FileSystemController {
     @PostMapping("/move")
     public String move(@RequestBody MoveCopyRequest req) {
         User user = users.getUser(req.username());
-        fs.move(user, req.name(), req.targetFolder()); // <-- aquí
+        try {
+            fs.move(user, req.name(), req.targetFolder());
+        } catch (RuntimeException e) {
+            fs.moveFromShared(user, req.name(), req.targetFolder());
+        }
         users.save(user);
         return "Movido";
     }
@@ -142,11 +161,26 @@ public class FileSystemController {
 
         try {
             User user = users.getUser(username);
-            fs.copy(user, name, targetFolder);
+            try {
+                fs.copy(user, name, targetFolder);
+            } catch (RuntimeException e) {
+                fs.copyFromShared(user, name, targetFolder);
+            }
             users.save(user);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al copiar: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/shared/changeDir")
+    public ResponseEntity<String> cambiarDirectorioCompartido(@RequestParam String username, @RequestParam String name) {
+        try {
+            User user = users.getUser(username);
+            String path = fs.changeToSharedDirectory(user, name); // Solo calcular el path sin modificar el estado del user
+            return ResponseEntity.ok(path);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se pudo cambiar de directorio: " + e.getMessage());
         }
     }
 
@@ -158,13 +192,18 @@ public class FileSystemController {
 
         try {
             User user = users.getUser(username);
-            fs.move(user, name, targetFolder);
+            try {
+                fs.move(user, name, targetFolder);
+            } catch (RuntimeException e) {
+                fs.moveFromShared(user, name, targetFolder);
+            }
             users.save(user);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al mover: " + e.getMessage());
         }
     }
+
 
     @GetMapping("/folders")
     public ResponseEntity<List<String>> listarCarpetasUsuario(@RequestParam String username) {
