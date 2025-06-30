@@ -161,5 +161,75 @@
       "modified": "2025-06-29T03:16:01.135982700",
       "size": 0
     }
+  },
+  "patito": {
+    "username": "patito",
+    "password": "1234",
+    "maxSize": 10240,
+    "root": {
+      "children": [],
+      "name": "root",
+      "created": "2025-06-30T07:51:29.498302700",
+      "modified": "2025-06-30T08:10:30.366632",
+      "size": 0
+    },
+    "shared": {
+      "children": [],
+      "name": "shared",
+      "created": "2025-06-30T07:51:29.498302700",
+      "modified": "2025-06-30T07:51:29.498302700",
+      "size": 0
+    },
+    "currentDirectory": {
+      "children": [],
+      "name": "root",
+      "created": "2025-06-30T07:51:29.498302700",
+      "modified": "2025-06-30T08:10:30.366632",
+      "size": 0
+    }
+  },
+  "mari0502": {
+    "username": "mari0502",
+    "password": "1234",
+    "maxSize": 10240,
+    "root": {
+      "children": [
+        {
+          "name": "Juegos",
+          "created": "2025-06-30T07:57:46.031909400",
+          "modified": "2025-06-30T07:57:46.031909400",
+          "size": 0,
+          "type": "directory",
+          "children": []
+        }
+      ],
+      "name": "root",
+      "created": "2025-06-30T07:51:43.661772",
+      "modified": "2025-06-30T08:09:35.018130200",
+      "size": 0
+    },
+    "shared": {
+      "children": [],
+      "name": "shared",
+      "created": "2025-06-30T07:51:43.661772",
+      "modified": "2025-06-30T08:10:43.947285700",
+      "size": 0
+    },
+    "currentDirectory": {
+      "children": [
+        {
+          "name": "Juegos",
+          "created": "2025-06-30T07:57:46.031909400",
+          "modified": "2025-06-30T07:57:46.031909400",
+          "size": 0,
+          "type": "directory",
+          "children": []
+        }
+      ],
+      "name": "root",
+      "created": "2025-06-30T07:51:43.661772",
+      "modified": "2025-06-30T08:09:35.018130200",
+      "size": 0
+    }
   }
 }

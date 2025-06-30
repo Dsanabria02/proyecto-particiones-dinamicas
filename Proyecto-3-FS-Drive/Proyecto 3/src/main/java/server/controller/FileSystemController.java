@@ -243,6 +243,33 @@ public class FileSystemController {
         }
     }
 
+    @GetMapping("/espacio")
+    public ResponseEntity<EspacioDTO> getEspacio(@RequestParam String username) {
+        User user = users.getUser(username);
+        int usado = user.getEspacioUtilizado();
+        int maximo = user.getMaxSize();
+        return ResponseEntity.ok(new EspacioDTO(usado, maximo));
+    }
+
+    public static class EspacioDTO {
+        private int usado;
+        private int maximo;
+
+        public EspacioDTO(int usado, int maximo) {
+            this.usado = usado;
+            this.maximo = maximo;
+        }
+
+        public int getUsado() {
+            return usado;
+        }
+
+        public int getMaximo() {
+            return maximo;
+        }
+    }
+
+
     public static class DeleteRequest {
         public String username;
         public String name;
