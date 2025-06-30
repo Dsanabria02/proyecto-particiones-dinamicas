@@ -143,6 +143,12 @@ export async function cambiarDirectorioCompartidoAPI(username, name) {
   return await response.text(); // retorna el path
 }
 
+// Llamada al endpoint para obtener el espacio en uso
+export async function obtenerEspacio(username) {
+  const res = await fetch(`/api/fs/espacio?username=${username}`);
+  if (!res.ok) throw new Error("Error al obtener espacio");
+  return await res.json(); // { usado: 4560, maximo: 10240 }
+}
 
 // ------------------- FUNCIONES DE AUTENTICACIÓN -------------------
 

@@ -15,7 +15,8 @@ import {
   copiarArchivoAPI,
   moverArchivoAPI,
   verArchivoCompartidoAPI,
-  cambiarDirectorioCompartidoAPI
+  cambiarDirectorioCompartidoAPI,
+  obtenerEspacio
 } from "./api.js";
 
 let usuarioActual = "";
@@ -94,13 +95,22 @@ export function refrescar() {
     return;
   }
 
-  // Mostrar ruta actual
   mostrarRuta(usuarioActual);
-
   listarArchivos(usuarioActual).then(data => {
     mostrarArchivos(data);
   });
+
+  // Mostrar uso de espacio
+  obtenerEspacio(usuarioActual)
+    .then(({ usado, maximo }) => {
+      document.getElementById("uso-espacio").textContent =
+        `Espacio usado: ${usado} / ${maximo} bytes`;
+    })
+    .catch(err => {
+      console.error("Error al obtener espacio:", err.message);
+    });
 }
+
 
 function mostrarArchivos(textoPlano, esCompartido = false) {
   const tabla = document.getElementById("tabla-archivos");
@@ -192,6 +202,14 @@ function manejarUploadArchivo() {
     const nombre = file.name.split('.').slice(0, -1).join('.');
     const extension = file.name.split('.').pop();
     const contenido = await file.text();
+    const tamañoArchivo = contenido.length;
+
+    const { usado, maximo } = await obtenerEspacio(usuarioActual);
+
+    if (usado + tamañoArchivo > maximo) {
+      mostrarMensaje(`No se puede subir el archivo. Espacio disponible: ${maximo - usado} bytes, archivo requiere: ${tamañoArchivo} bytes.`);
+      return;
+    }
 
     const existe = await verificarExistencia(usuarioActual, nombre);
     let overwrite = false;
@@ -206,10 +224,10 @@ function manejarUploadArchivo() {
       mostrarMensaje("Archivo subido con éxito.");
     });
 
-    // Limpiar input para permitir subir el mismo archivo de nuevo si se desea
-    input.value = "";
+    input.value = ""; // limpiar input
   });
 }
+
 
 // --- MODALES DE CREACIÓN ---
 window.crearArchivoDesdeModal = async function () {
@@ -218,6 +236,14 @@ window.crearArchivoDesdeModal = async function () {
   const content = document.getElementById("input-contenido-archivo").value;
 
   if (!name || !ext || !content.trim()) return mostrarMensaje("Todos los campos son obligatorios.");
+
+  const tamañoArchivo = content.length;
+  const { usado, maximo } = await obtenerEspacio(usuarioActual);
+
+  if (usado + tamañoArchivo > maximo) {
+    mostrarMensaje(`No se puede crear el archivo. Espacio disponible: ${maximo - usado} bytes, archivo requiere: ${tamañoArchivo} bytes.`);
+    return;
+  }
 
   const existe = await verificarExistencia(usuarioActual, name);
   let overwrite = false;
@@ -232,6 +258,7 @@ window.crearArchivoDesdeModal = async function () {
     refrescar();
   });
 };
+
 
 window.crearDirectorioDesdeModal = async function () {
   const name = document.getElementById("input-nombre-carpeta").value.trim();
@@ -414,11 +441,6 @@ window.confirmarOperacion = async function() {
     cerrarModal("modal-operacion");
     refrescar();
     if (tipoOperacion === "copiar") {
-      await copiarArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
-    } else {
-      await moverArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
-    }
-    if (tipoOperacion === "copiar") {
       mostrarMensaje(`Archivo copiado con éxito.`);
     } else {
       mostrarMensaje(`Archivo movido con éxito.`);
@@ -431,27 +453,6 @@ window.confirmarOperacion = async function() {
 window.cambiarDirectorioCompartido = function (nombre) {
   enModoCompartido = true;
   cambiarDirectorioCompartidoAPI(usuarioActual, nombre).then(() => refrescar());
-};
-
-
-window.confirmarOperacion = async function() {
-  const destino = document.getElementById("select-carpeta").value;
-  try {
-    if (tipoOperacion === "copiar") {
-      await copiarArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
-    } else {
-      await moverArchivoAPI(usuarioActual, nombreAMoverOCopiar, destino);
-    }
-    cerrarModal("modal-operacion");
-    refrescar();
-    if (tipoOperacion === "copiar") {
-      mostrarMensaje(`Archivo copiado con éxito.`);
-    } else {
-      mostrarMensaje(`Archivo movido con éxito.`);
-    }
-  } catch (err) {
-    mostrarMensaje("Error al ejecutar la operación: " + err.message);
-  }
 };
 
 
