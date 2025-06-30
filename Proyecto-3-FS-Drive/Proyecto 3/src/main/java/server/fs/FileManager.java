@@ -90,9 +90,19 @@ public class FileManager {
         Node next = user.getCurrentDirectory().getChild(name);
         if (next != null && next.isDirectory()) {
             user.setCurrentDirectory((DirectoryNode) next);
-            return user.getCurrentDirectory().getPath(); // ✅ aquí usamos getPath()
+            return user.getCurrentDirectory().getPath(); // aquí usamos getPath()
         } else {
             throw new RuntimeException("Directorio no encontrado");
+        }
+    }
+
+    public String changeToSharedDirectory(User user, String name) {
+        Node next = user.getShared().getChild(name);
+        if (next != null && next.isDirectory()) {
+            user.setCurrentDirectory((DirectoryNode) next);
+            return user.getCurrentDirectory().getPath();
+        } else {
+            throw new RuntimeException("Directorio no encontrado en compartidos");
         }
     }
 
@@ -125,7 +135,7 @@ public class FileManager {
         if (n instanceof FileNode file) {
             file.setContent(newContent);
 
-            // 👇 ACTUALIZAR también el directorio contenedor
+            // ACTUALIZAR también el directorio contenedor
             DirectoryNode parent = user.getCurrentDirectory();
             parent.setModified(java.time.LocalDateTime.now());
         } else {
@@ -173,11 +183,11 @@ public class FileManager {
     public void delete(User user, String name) {
         DirectoryNode currentDir = user.getCurrentDirectory();
         Node nodeToDelete = currentDir.getChild(name);
-    
+
         if (nodeToDelete == null) {
             throw new IllegalArgumentException("Archivo o directorio no encontrado: " + name);
         }
-    
+
         if (nodeToDelete.isDirectory()) {
             // Es un DirectoryNode - eliminar en cascada
             DirectoryNode dirToDelete = (DirectoryNode) nodeToDelete;
@@ -190,12 +200,12 @@ public class FileManager {
     }
 
     /**
-    * Método auxiliar para eliminar recursivamente el contenido de un directorio
+     * Método auxiliar para eliminar recursivamente el contenido de un directorio
      */
     private void deleteDirectoryRecursively(DirectoryNode directory) {
         // Crear copia para evitar ConcurrentModificationException
         List<Node> childrenCopy = new ArrayList<>(directory.getChildren());
-    
+
         for (Node child : childrenCopy) {
             if (child.isDirectory()) {
                 // Es un subdirectorio - llamada recursiva
@@ -226,7 +236,6 @@ public class FileManager {
             throw new RuntimeException("Tipo de nodo no soportado");
         }
     }
-
 
     public void move(User user, String name, String targetDirName) {
         Node node = user.getCurrentDirectory().getChild(name);
@@ -306,7 +315,6 @@ public class FileManager {
         return folders;
     }
 
-    
     private void collectFolderPaths(DirectoryNode node, String path, List<String> folders) {
         String currentPath = path.isEmpty() ? node.getName() : path + "/" + node.getName();
         folders.add(currentPath);
@@ -326,13 +334,14 @@ public class FileManager {
         DirectoryNode current = root;
 
         for (String part : parts) {
-            if (part.equals("root") || part.isBlank()) continue;
+            if (part.equals("root") || part.isBlank())
+                continue;
 
             Node nextNode = current.getChild(part);
             if (nextNode == null || !nextNode.isDirectory()) {
                 return null; // No existe o no es directorio
             }
-            current = (DirectoryNode) nextNode; 
+            current = (DirectoryNode) nextNode;
         }
 
         return current;
@@ -369,5 +378,46 @@ public class FileManager {
         }
         return name;
     }
+
+
+    public String viewFileFromShared(User user, String name) {
+        Node n = user.getSharedDirectory().getChild(name);
+        if (n instanceof FileNode f)
+            return f.getContent();
+        throw new RuntimeException("Archivo compartido no encontrado");
+    }
+
+    public String filePropertiesFromShared(User user, String name) {
+        Node n = user.getSharedDirectory().getChild(name);
+        if (n == null) throw new RuntimeException("No encontrado");
+        return n.getProperties();
+    }
+
+    public void deleteFromShared(User user, String name) {
+        user.getSharedDirectory().removeChild(name);
+    }
+
+    public void copyFromShared(User user, String name, String targetFolder) {
+        Node n = user.getSharedDirectory().getChild(name);
+        if (n == null) throw new RuntimeException("No encontrado");
+        copyNodeTo(n, user, targetFolder);
+    }
+
+    public void moveFromShared(User user, String name, String targetFolder) {
+        Node n = user.getSharedDirectory().getChild(name);
+        if (n == null) throw new RuntimeException("No encontrado");
+        copyNodeTo(n, user, targetFolder);
+        deleteFromShared(user, name);
+    }
+
+    private void copyNodeTo(Node n, User user, String targetFolder) {
+        DirectoryNode target = findDirectoryByPath(user.getRootDirectory(), targetFolder);
+        if (target == null)
+            throw new RuntimeException("Directorio destino no encontrado");
+
+        Node copy = cloneNode(n);
+        target.addChild(copy);
+    }
+
 
 }
