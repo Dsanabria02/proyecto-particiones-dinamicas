@@ -30,6 +30,7 @@ public class JsonPersistence {
                 .create();
     }
 
+
     public Map<String, User> cargarTodosLosUsuarios() {
         try {
             Path path = Path.of(DATA_PATH);
@@ -42,11 +43,22 @@ public class JsonPersistence {
 
             Type tipo = new TypeToken<Map<String, User>>() {
             }.getType();
-            return gson.fromJson(json, tipo);
+            Map<String, User> mapa = gson.fromJson(json, tipo);
+
+            // Asignar relaciones padre-hijo después de deserializar
+            for (User u : mapa.values()) {
+                asignarPadresRecursivo(u.getRootDirectory(), null);
+                asignarPadresRecursivo(u.getShared(), null);
+            }
+
+            return mapa;
         } catch (IOException | JsonSyntaxException e) {
             throw new RuntimeException("Error al cargar usuarios.json", e);
         }
     }
+
+    
+    
 
     public void saveUser(User user) {
         try {
@@ -69,4 +81,13 @@ public class JsonPersistence {
         }
         return user;
     }
+
+    private void asignarPadresRecursivo(DirectoryNode actual, DirectoryNode padre) {
+    actual.setParent(padre);
+    for (Node hijo : actual.getChildren()) {
+        if (hijo instanceof DirectoryNode dirHijo) {
+            asignarPadresRecursivo(dirHijo, actual);
+        }
+    }
+}
 }
