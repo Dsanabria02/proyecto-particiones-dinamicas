@@ -134,6 +134,15 @@ export async function moverArchivoAPI(username, nombreArchivo, carpetaDestino) {
   if (!res.ok) throw new Error('No se pudo mover el archivo.');
 }
 
+export async function cambiarDirectorioCompartidoAPI(username, name) {
+  const params = new URLSearchParams({ username, name });
+  const response = await fetch(`/api/fs/shared/changeDir?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error("Error al cambiar de directorio compartido");
+  }
+  return await response.text(); // retorna el path
+}
+
 
 // ------------------- FUNCIONES DE AUTENTICACIÓN -------------------
 
