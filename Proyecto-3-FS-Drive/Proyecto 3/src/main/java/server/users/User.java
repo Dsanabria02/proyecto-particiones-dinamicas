@@ -85,4 +85,8 @@ public class User {
         this.currentDirectory = currentDirectory;
     }
 
+    public DirectoryNode getSharedDirectory() {
+        return getShared();
+    }
+
 }
